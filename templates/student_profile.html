@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Student Profile</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .profile-container { max-width:800px; margin:40px auto; padding:24px; background:#fff; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+    .profile-head { display:flex; justify-content:space-between; align-items:center; }
+    .profile-fields { margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    label{font-weight:600; color:#333; display:block; font-size:14px}
+    input{width:100%; padding:8px; border-radius:6px; border:1px solid #ccc}
+    .actions{margin-top:18px; display:flex; gap:12px}
+    .btn{padding:10px 14px; border-radius:6px; border:none; cursor:pointer}
+    .btn-save{background:#076235;color:white}
+    .btn-del{background:#d9534f;color:white}
+    .btn-back{background:#eee;color:#333}
+    .message{margin-top:12px; font-weight:600}
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+      <div class="logo"><h3>Student Management</h3></div>
+      <ul class="nav-links">
+          <li><a href="/">Dashboard</a></li>
+          <li><a href="/students">Students</a></li>
+          <li><a href="/add_student">Add Student</a></li>
+      </ul>
+  </nav>
+
+  <div class="profile-container">
+    <div class="profile-head">
+      <h2 id="profile-name">Loading...</h2>
+      <div>
+        <button class="btn btn-back" onclick="location.href='/students'">← Back</button>
+      </div>
+    </div>
+
+    <div class="profile-fields">
+      <div>
+        <label>Name</label>
+        <input id="inp-name" type="text" />
+      </div>
+      <div>
+        <label>Roll</label>
+        <input id="inp-roll" type="text" />
+      </div>
+      <div>
+        <label>Branch</label>
+        <input id="inp-branch" type="text" />
+      </div>
+      <div>
+        <label>Year</label>
+        <input id="inp-year" type="text" />
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-save" id="saveBtn">Save Changes</button>
+      <button class="btn btn-del" id="deleteBtn">Delete Student</button>
+      <div id="msg" class="message"></div>
+    </div>
+  </div>
+
+<script>
+  // Extract id from URL: /student/<id>
+  const pathParts = location.pathname.split('/');
+  const studentId = parseInt(pathParts[pathParts.length - 1], 10);
+
+  async function showMessage(text, color='green') {
+    const el = document.getElementById('msg');
+    el.style.color = color;
+    el.textContent = text;
+    setTimeout(()=> el.textContent = '', 3000);
+  }
+
+  async function loadStudent() {
+    try {
+      const res = await fetch(`/api/students/${studentId}`);
+      if (!res.ok) {
+        showMessage('Student not found', 'red');
+        return;
+      }
+      const s = await res.json();
+      document.getElementById('profile-name').textContent = s.name;
+      document.getElementById('inp-name').value = s.name;
+      document.getElementById('inp-roll').value = s.roll;
+      document.getElementById('inp-branch').value = s.branch;
+      document.getElementById('inp-year').value = s.year;
+    } catch (err) {
+      console.error(err);
+      showMessage('Error loading student', 'red');
+    }
+  }
+
+  document.getElementById('saveBtn').addEventListener('click', async () => {
+    const payload = {
+      name: document.getElementById('inp-name').value.trim(),
+      roll: document.getElementById('inp-roll').value.trim(),
+      branch: document.getElementById('inp-branch').value.trim(),
+      year: document.getElementById('inp-year').value.trim()
+    };
+    // Basic frontend validation
+    if (!payload.name || !payload.roll) {
+      showMessage('Name and Roll are required', 'red'); return;
+    }
+    try {
+      const res = await fetch(`/api/students/${studentId}`, {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showMessage(data.message || 'Updated', 'green');
+        document.getElementById('profile-name').textContent = payload.name;
+      } else {
+        showMessage(data.error || 'Update failed', 'red');
+      }
+    } catch (err) {
+      console.error(err);
+      showMessage('Error updating', 'red');
+    }
+  });
+
+  document.getElementById('deleteBtn').addEventListener('click', async () => {
+    if (!confirm('Delete this student? This cannot be undone.')) return;
+    try {
+      const res = await fetch(`/api/students/${studentId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || 'Deleted');
+        location.href = '/students';
+      } else {
+        showMessage(data.error || 'Delete failed', 'red');
+      }
+    } catch (err) {
+      console.error(err);
+      showMessage('Error deleting', 'red');
+    }
+  });
+
+  // load on page open
+  loadStudent();
+</script>
+</body>
+</html>
