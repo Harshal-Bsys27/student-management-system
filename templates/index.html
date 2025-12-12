@@ -10,9 +10,9 @@
     <nav class="navbar">
         <div class="logo">Student Management</div>
         <ul class="nav-links">
-            <li><a href="#">Dashboard</a></li>
-            <li><a href="#">Students</a></li>
-            <li><a href="#">Add Student</a></li>
+           <li><a href="/">Dashboard</a></li>
+        <li><a href="/students">Students</a></li>
+<li><a href="/add_student">Add Student</a></li>
         </ul>
     </nav>
 
@@ -27,13 +27,15 @@
     </main>
 
     <script>
-        // Fetch data from backend API
-        fetch('http://127.0.0.1:5000/students')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('total-students').innerText = data.length;
-            })
-            .catch(error => console.error('Error:', error));
+    // Fetch total students from API
+    fetch('/api/students')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('total-students').innerText = data.length;
+        })
+        .catch(error => console.error('Error:', error));
+</script>
+
     </script>
 </body>
 </html>

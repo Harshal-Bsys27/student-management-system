@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Student</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .container {
+            padding: 40px;
+            max-width: 600px;
+            margin: auto;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #4a60ff;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        input {
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            margin-top: 20px;
+            padding: 12px;
+            background-color: #4a60ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #3b4edc;
+        }
+        .message {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Student Management</div>
+        <ul class="nav-links">
+            <li><a href="/">Dashboard</a></li>
+            <li><a href="/students.html">Students</a></li>
+            <li><a href="/add_student.html">Add Student</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h2>Add New Student</h2>
+        <form id="add-student-form">
+            <label for="name">Name:</label>
+            <input type="text" id="name" required>
+
+            <label for="roll">Roll Number:</label>
+            <input type="text" id="roll" required>
+
+            <label for="branch">Branch:</label>
+            <input type="text" id="branch" required>
+
+            <label for="year">Year:</label>
+            <input type="text" id="year" required>
+
+            <button type="submit">Add Student</button>
+        </form>
+        <div class="message" id="message"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById("add-student-form");
+        const messageDiv = document.getElementById("message");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const studentData = {
+                name: document.getElementById("name").value,
+                roll: document.getElementById("roll").value,
+                branch: document.getElementById("branch").value,
+                year: document.getElementById("year").value
+            };
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/students", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(studentData)
+                });
+
+                const result = await response.json();
+
+                if (response.status === 201) {
+                    messageDiv.style.color = "green";
+                    messageDiv.textContent = result.message;
+                    form.reset();
+                } else {
+                    messageDiv.style.color = "red";
+                    messageDiv.textContent = result.error;
+                }
+            } catch (error) {
+                messageDiv.style.color = "red";
+                messageDiv.textContent = "Error connecting to server";
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>
