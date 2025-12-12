@@ -1,20 +1,35 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import sqlite3
+import os
 
-app = Flask(__name__)
+# ------------------------------
+# Project folder paths
+# ------------------------------
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # student-management-system root
+TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+DB_PATH = os.path.join(os.path.dirname(__file__), "students.db")  # backend folder
+
+# ------------------------------
+# Flask app initialization
+# ------------------------------
+app = Flask(__name__, template_folder=TEMPLATE_DIR, static_folder=STATIC_DIR)
 CORS(app)
 
+# ------------------------------
+# Database setup
+# ------------------------------
 def init_db():
-    conn = sqlite3.connect("students.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("""
         CREATE TABLE IF NOT EXISTS students (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            roll TEXT,
-            branch TEXT,
-            year TEXT
+            name TEXT NOT NULL,
+            roll TEXT NOT NULL,
+            branch TEXT NOT NULL,
+            year TEXT NOT NULL
         )
     """)
     conn.commit()
@@ -22,47 +37,72 @@ def init_db():
 
 init_db()
 
+# ------------------------------
+# Routes
+# ------------------------------
+
+# Home route for dashboard frontend
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+# Get all students
 @app.route("/students", methods=["GET"])
 def get_students():
-    conn = sqlite3.connect("students.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT * FROM students")
     rows = c.fetchall()
     conn.close()
-
     students = [{"id": r[0], "name": r[1], "roll": r[2], "branch": r[3], "year": r[4]} for r in rows]
     return jsonify(students)
 
+# Add a new student
 @app.route("/students", methods=["POST"])
 def add_student():
     data = request.json
-    conn = sqlite3.connect("students.db")
+    if not all(key in data for key in ("name", "roll", "branch", "year")):
+        return jsonify({"error": "Missing fields"}), 400
+
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("INSERT INTO students (name, roll, branch, year) VALUES (?,?,?,?)",
-              (data["name"], data["roll"], data["branch"], data["year"]))
+    c.execute(
+        "INSERT INTO students (name, roll, branch, year) VALUES (?, ?, ?, ?)",
+        (data["name"], data["roll"], data["branch"], data["year"])
+    )
     conn.commit()
     conn.close()
-    return jsonify({"message": "Student added"})
+    return jsonify({"message": "Student added successfully"}), 201
 
-@app.route("/students/<id>", methods=["PUT"])
+# Update student
+@app.route("/students/<int:id>", methods=["PUT"])
 def update_student(id):
     data = request.json
-    conn = sqlite3.connect("students.db")
+    if not all(key in data for key in ("name", "roll", "branch", "year")):
+        return jsonify({"error": "Missing fields"}), 400
+
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("UPDATE students SET name=?, roll=?, branch=?, year=? WHERE id=?",
-              (data["name"], data["roll"], data["branch"], data["year"], id))
+    c.execute(
+        "UPDATE students SET name=?, roll=?, branch=?, year=? WHERE id=?",
+        (data["name"], data["roll"], data["branch"], data["year"], id)
+    )
     conn.commit()
     conn.close()
-    return jsonify({"message": "Student updated"})
+    return jsonify({"message": "Student updated successfully"}), 200
 
-@app.route("/students/<id>", methods=["DELETE"])
+# Delete student
+@app.route("/students/<int:id>", methods=["DELETE"])
 def delete_student(id):
-    conn = sqlite3.connect("students.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("DELETE FROM students WHERE id=?", (id,))
     conn.commit()
     conn.close()
-    return jsonify({"message": "Student deleted"})
+    return jsonify({"message": "Student deleted successfully"}), 200
 
+# ------------------------------
+# Run app
+# ------------------------------
 if __name__ == "__main__":
     app.run(debug=True)

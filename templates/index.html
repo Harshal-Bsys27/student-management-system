@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Student Management</div>
+        <ul class="nav-links">
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="#">Students</a></li>
+            <li><a href="#">Add Student</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <h1>Dashboard</h1>
+        <div class="cards">
+            <div class="card">
+                <h3>Total Students</h3>
+                <p id="total-students">Loading...</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Fetch data from backend API
+        fetch('http://127.0.0.1:5000/students')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('total-students').innerText = data.length;
+            })
+            .catch(error => console.error('Error:', error));
+    </script>
+</body>
+</html>
