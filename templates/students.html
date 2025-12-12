@@ -5,23 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Students List</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
     <style>
-        /* Extra styles for table */
+        /* Container */
+        .container {
+            padding: 40px;
+        }
+
+        /* Search + Filters */
+        .controls {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .controls input, .controls select {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            width: 200px;
+        }
+
+        /* Table styles */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 30px;
+            margin-top: 10px;
+            font-size: 15px;
         }
         th, td {
             padding: 12px;
-            text-align: left;
             border-bottom: 1px solid #ddd;
+            text-align: left;
         }
         th {
-            background-color: #4a60ff;
+            cursor: pointer;
+            background: #4a60ff;
             color: white;
         }
-        tr:hover {background-color: #f1f1f1;}
+        tr:hover {
+            background: #f1f1f1;
+        }
+
+        /* Buttons */
         .btn {
             padding: 6px 12px;
             margin: 2px;
@@ -31,11 +58,9 @@
         }
         .btn-edit { background-color: #f0ad4e; color: white; }
         .btn-delete { background-color: #d9534f; color: white; }
-        .container {
-            padding: 40px;
-        }
     </style>
 </head>
+
 <body>
     <nav class="navbar">
         <div class="logo">Student Management</div>
@@ -48,73 +73,159 @@
 
     <div class="container">
         <h2>Students List</h2>
+
+        <!-- Search + Filter Menu -->
+        <div class="controls">
+            <input type="text" id="searchBox" placeholder="Search student...">
+
+            <select id="branchFilter">
+                <option value="">Filter by Branch</option>
+            </select>
+
+            <select id="yearFilter">
+                <option value="">Filter by Year</option>
+            </select>
+        </div>
+
+        <!-- Table -->
         <table id="students-table">
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Name</th>
-                    <th>Roll</th>
-                    <th>Branch</th>
-                    <th>Year</th>
+                    <th onclick="sortTable('name')">Name ⬍</th>
+                    <th onclick="sortTable('roll')">Roll ⬍</th>
+                    <th onclick="sortTable('branch')">Branch ⬍</th>
+                    <th onclick="sortTable('year')">Year ⬍</th>
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                <!-- Rows will be populated via JS -->
-            </tbody>
+            <tbody></tbody>
         </table>
     </div>
 
-    <script>
-        async function fetchStudents() {
-            try {
-                // Corrected API endpoint
-                const response = await fetch('/api/students');
-                const students = await response.json();
-                const tbody = document.querySelector('#students-table tbody');
-                tbody.innerHTML = "";
+<script>
+    let allStudents = [];
+    let sortOrder = { name: 1, roll: 1, branch: 1, year: 1 };
 
-                students.forEach(student => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${student.id}</td>
-                        <td>${student.name}</td>
-                        <td>${student.roll}</td>
-                        <td>${student.branch}</td>
-                        <td>${student.year}</td>
-                        <td>
-                            <button class="btn btn-edit" onclick="editStudent(${student.id})">Edit</button>
-                            <button class="btn btn-delete" onclick="deleteStudent(${student.id})">Delete</button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } catch (error) {
-                console.error("Error fetching students:", error);
-            }
+    // Fetch all students
+    async function fetchStudents() {
+        try {
+            const response = await fetch('/api/students');
+            allStudents = await response.json();
+
+            populateFilters();
+            renderTable(allStudents);
+        } catch (error) {
+            console.error("Error fetching students:", error);
         }
+    }
 
-        function editStudent(id) {
-            alert(`Edit functionality for ID ${id} coming soon`);
+    // Render table rows dynamically
+    function renderTable(data) {
+        const tbody = document.querySelector('#students-table tbody');
+        tbody.innerHTML = "";
+
+        data.forEach(student => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${student.id}</td>
+                <td>${student.name}</td>
+                <td>${student.roll}</td>
+                <td>${student.branch}</td>
+                <td>${student.year}</td>
+                <td>
+                    <button class="btn btn-edit" onclick="editStudent(${student.id})">Edit</button>
+                    <button class="btn btn-delete" onclick="deleteStudent(${student.id})">Delete</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Search functionality
+    document.getElementById('searchBox').addEventListener('input', function () {
+        const value = this.value.toLowerCase();
+        const filtered = allStudents.filter(s =>
+            s.name.toLowerCase().includes(value) ||
+            s.roll.toLowerCase().includes(value) ||
+            s.branch.toLowerCase().includes(value) ||
+            s.year.toLowerCase().includes(value)
+        );
+        renderTable(filtered);
+    });
+
+    // Populate filters dynamically
+    function populateFilters() {
+        const branchSet = new Set(allStudents.map(s => s.branch));
+        const yearSet = new Set(allStudents.map(s => s.year));
+
+        const branchFilter = document.getElementById('branchFilter');
+        const yearFilter = document.getElementById('yearFilter');
+
+        branchFilter.innerHTML = `<option value="">Filter by Branch</option>`;
+        yearFilter.innerHTML = `<option value="">Filter by Year</option>`;
+
+        branchSet.forEach(b => {
+            branchFilter.innerHTML += `<option value="${b}">${b}</option>`;
+        });
+
+        yearSet.forEach(y => {
+            yearFilter.innerHTML += `<option value="${y}">${y}</option>`;
+        });
+    }
+
+    // Filter event listeners
+    document.getElementById('branchFilter').addEventListener('change', applyFilters);
+    document.getElementById('yearFilter').addEventListener('change', applyFilters);
+
+    function applyFilters() {
+        const branch = document.getElementById('branchFilter').value;
+        const year = document.getElementById('yearFilter').value;
+
+        let filtered = allStudents;
+
+        if (branch) filtered = filtered.filter(s => s.branch === branch);
+        if (year) filtered = filtered.filter(s => s.year === year);
+
+        renderTable(filtered);
+    }
+
+    // Sorting function
+    function sortTable(field) {
+        sortOrder[field] *= -1; // Toggle ASC/DESC
+
+        allStudents.sort((a, b) => {
+            if (a[field] < b[field]) return -1 * sortOrder[field];
+            if (a[field] > b[field]) return 1 * sortOrder[field];
+            return 0;
+        });
+
+        renderTable(allStudents);
+    }
+
+    // Edit placeholder
+    function editStudent(id) {
+        alert(`Edit feature coming soon for ID: ${id}`);
+    }
+
+    // Delete student
+    async function deleteStudent(id) {
+        if (!confirm("Are you sure you want to delete this student?")) return;
+
+        try {
+            const response = await fetch(`/api/students/${id}`, { method: "DELETE" });
+            const data = await response.json();
+            alert(data.message);
+
+            fetchStudents(); // refresh
+        } catch (error) {
+            console.error("Error deleting student:", error);
         }
+    }
 
-        async function deleteStudent(id) {
-            if (!confirm("Are you sure you want to delete this student?")) return;
-            try {
-                // Corrected API endpoint
-                const response = await fetch(`/api/students/${id}`, {
-                    method: "DELETE"
-                });
-                const data = await response.json();
-                alert(data.message);
-                fetchStudents(); // refresh table
-            } catch (error) {
-                console.error("Error deleting student:", error);
-            }
-        }
+    // Load data
+    fetchStudents();
+</script>
 
-        // Initial load
-        fetchStudents();
-    </script>
 </body>
 </html>

@@ -5,37 +5,133 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Management Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        /* Extra dashboard styling */
+        main {
+            padding: 40px;
+        }
+        .cards {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .card {
+            background: #f8f8ff;
+            padding: 25px;
+            border-radius: 10px;
+            width: 260px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .card h3 {
+            color: #4a60ff;
+            margin-bottom: 10px;
+        }
+        .quick-links {
+            margin-top: 40px;
+        }
+        .quick-links a {
+            display: inline-block;
+            margin-right: 15px;
+            padding: 12px 18px;
+            background: #4a60ff;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+        .recent-box {
+            margin-top: 40px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 500px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .recent-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+
 </head>
 <body>
     <nav class="navbar">
         <div class="logo">Student Management</div>
         <ul class="nav-links">
            <li><a href="/">Dashboard</a></li>
-        <li><a href="/students">Students</a></li>
-<li><a href="/add_student">Add Student</a></li>
+           <li><a href="/students">Students</a></li>
+           <li><a href="/add_student">Add Student</a></li>
         </ul>
     </nav>
 
     <main>
         <h1>Dashboard</h1>
+
         <div class="cards">
             <div class="card">
                 <h3>Total Students</h3>
                 <p id="total-students">Loading...</p>
             </div>
+
+            <div class="card">
+                <h3>Total Branches</h3>
+                <p id="total-branches">Loading...</p>
+            </div>
+
+            <div class="card">
+                <h3>Students This Year</h3>
+                <p id="students-year">Loading...</p>
+            </div>
         </div>
+
+        <div class="quick-links">
+            <h2>Quick Actions</h2>
+            <a href="/add_student">➕ Add Student</a>
+            <a href="/students">📄 View Students</a>
+        </div>
+
+        <div class="recent-box">
+            <h3>Recently Added Students</h3>
+            <div id="recent-list">Loading...</div>
+        </div>
+
     </main>
 
     <script>
-    // Fetch total students from API
-    fetch('/api/students')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('total-students').innerText = data.length;
-        })
-        .catch(error => console.error('Error:', error));
-</script>
+        // Fetch total students + branches + years
+        fetch('/api/students')
+            .then(response => response.json())
+            .then(data => {
 
+                // Total students
+                document.getElementById('total-students').innerText = data.length;
+
+                // Total branches
+                const branchSet = new Set(data.map(s => s.branch));
+                document.getElementById('total-branches').innerText = branchSet.size;
+
+                // Students by Year (latest year)
+                const currentYear = new Date().getFullYear().toString();
+                const yearCount = data.filter(s => s.year === currentYear).length;
+                document.getElementById('students-year').innerText = yearCount;
+
+                // Recent 5 students
+                let recent = data.slice(-5).reverse();
+                let recentHtml = "";
+
+                recent.forEach(st => {
+                    recentHtml += `
+                        <div class="recent-item">
+                            <strong>${st.name}</strong> (${st.roll}) - ${st.branch}, ${st.year}
+                        </div>
+                    `;
+                });
+
+                document.getElementById('recent-list').innerHTML = recentHtml;
+            })
+            .catch(error => console.error('Error:', error));
     </script>
+
 </body>
 </html>
