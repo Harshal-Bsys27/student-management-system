@@ -41,8 +41,8 @@
         <div class="logo">Student Management</div>
         <ul class="nav-links">
             <li><a href="/">Dashboard</a></li>
-            <li><a href="/students.html">Students</a></li>
-            <li><a href="/add_student.html">Add Student</a></li>
+            <li><a href="/students">Students</a></li>
+            <li><a href="/add_student">Add Student</a></li>
         </ul>
     </nav>
 
@@ -68,7 +68,8 @@
     <script>
         async function fetchStudents() {
             try {
-                const response = await fetch('http://127.0.0.1:5000/students');
+                // Corrected API endpoint
+                const response = await fetch('/api/students');
                 const students = await response.json();
                 const tbody = document.querySelector('#students-table tbody');
                 tbody.innerHTML = "";
@@ -94,14 +95,14 @@
         }
 
         function editStudent(id) {
-            // Placeholder: later we can redirect to edit page
             alert(`Edit functionality for ID ${id} coming soon`);
         }
 
         async function deleteStudent(id) {
             if (!confirm("Are you sure you want to delete this student?")) return;
             try {
-                const response = await fetch(`http://127.0.0.1:5000/students/${id}`, {
+                // Corrected API endpoint
+                const response = await fetch(`/api/students/${id}`, {
                     method: "DELETE"
                 });
                 const data = await response.json();

@@ -56,8 +56,8 @@
         <div class="logo">Student Management</div>
         <ul class="nav-links">
             <li><a href="/">Dashboard</a></li>
-            <li><a href="/students.html">Students</a></li>
-            <li><a href="/add_student.html">Add Student</a></li>
+            <li><a href="/students">Students</a></li>
+            <li><a href="/add_student">Add Student</a></li>
         </ul>
     </nav>
 
@@ -96,7 +96,8 @@
             };
 
             try {
-                const response = await fetch("http://127.0.0.1:5000/students", {
+                // Corrected API endpoint
+                const response = await fetch("/api/students", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
