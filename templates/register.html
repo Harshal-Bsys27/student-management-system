@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register | Student Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        body {
+            background: #f4f6f9;
+        }
+
+        .auth-container {
+            max-width: 420px;
+            margin: 90px auto;
+            padding: 35px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+        .title {
+            text-align: center;
+            font-size: 26px;
+            font-weight: 600;
+            color: #31034e;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #31034e;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #31034e;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            margin-top: 5px;
+        }
+
+        button:hover {
+            opacity: 0.92;
+        }
+
+        .link {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 14px;
+        }
+
+        .error {
+            color: red;
+            text-align: center;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-container">
+    <div class="title">Student Management System</div>
+    <div class="subtitle">Create an account to manage students</div>
+
+    <div id="error" class="error"></div>
+
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+
+    <button onclick="register()">Register</button>
+
+    <div class="link">
+        Already registered? <a href="/login">Login</a>
+    </div>
+</div>
+
+<script>
+async function register() {
+    const res = await fetch("/register", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            username: document.getElementById("username").value,
+            email: document.getElementById("email").value,
+            password: document.getElementById("password").value
+        })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+        alert("Registration successful. Please login.");
+        window.location.href = "/login";
+    } else {
+        document.getElementById("error").innerText = data.error;
+    }
+}
+</script>
+
+</body>
+</html>

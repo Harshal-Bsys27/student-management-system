@@ -1,66 +1,141 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session, redirect
 from flask_cors import CORS
 import sqlite3
 import os
+from werkzeug.security import generate_password_hash, check_password_hash
 
-# ------------------------------
-# Project folder paths
-# ------------------------------
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # root folder
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
-DB_PATH = os.path.join(os.path.dirname(__file__), "students.db")  # backend/db
+DB_PATH = os.path.join(os.path.dirname(__file__), "students.db")
 
-# ------------------------------
-# Flask app initialization
-# ------------------------------
 app = Flask(__name__, template_folder=TEMPLATE_DIR, static_folder=STATIC_DIR)
+app.secret_key = "super_secret_key_change_later"
 CORS(app)
 
 # ------------------------------
-# Database setup
+# DATABASE INIT
 # ------------------------------
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
+
     c.execute("""
         CREATE TABLE IF NOT EXISTS students (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            roll TEXT NOT NULL,
-            branch TEXT NOT NULL,
-            year TEXT NOT NULL
+            name TEXT,
+            roll TEXT,
+            branch TEXT,
+            year TEXT
         )
     """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            email TEXT UNIQUE,
+            password_hash TEXT,
+            role TEXT
+        )
+    """)
+
     conn.commit()
     conn.close()
 
 init_db()
 
 # ------------------------------
-# FRONTEND PAGE ROUTES
+# HELPERS
+# ------------------------------
+def is_logged_in():
+    return "user_id" in session
+
+def is_admin():
+    return session.get("role") == "admin"
+
+# ------------------------------
+# AUTH ROUTES
+# ------------------------------
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        data = request.json
+
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("SELECT * FROM users WHERE username=?", (data["username"],))
+        user = c.fetchone()
+        conn.close()
+
+        if user and check_password_hash(user[3], data["password"]):
+            session["user_id"] = user[0]
+            session["username"] = user[1]
+            session["role"] = user[4]
+            return jsonify({"message": "Login successful"})
+
+        return jsonify({"error": "Invalid credentials"}), 401
+
+    return render_template("login.html")
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        data = request.json
+        password_hash = generate_password_hash(data["password"])
+
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+
+        # Check if first user
+        c.execute("SELECT COUNT(*) FROM users")
+        user_count = c.fetchone()[0]
+        role = "admin" if user_count == 0 else "user"
+
+        try:
+            c.execute("""
+                INSERT INTO users (username, email, password_hash, role)
+                VALUES (?, ?, ?, ?)
+            """, (data["username"], data["email"], password_hash, role))
+            conn.commit()
+        except:
+            return jsonify({"error": "User already exists"}), 400
+        finally:
+            conn.close()
+
+        return jsonify({"message": "Registration successful", "role": role})
+
+    return render_template("register.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/login")
+
+# ------------------------------
+# PAGES
 # ------------------------------
 @app.route("/")
 def index():
-    return render_template("index.html")
+    if not is_logged_in():
+        return redirect("/login")
+    return render_template("index.html", username=session["username"], role=session["role"])
 
 @app.route("/students")
 def students_page():
+    if not is_logged_in():
+        return redirect("/login")
     return render_template("students.html")
 
 @app.route("/add_student")
 def add_student_page():
+    if not is_logged_in():
+        return redirect("/login")
     return render_template("add_student.html")
 
-@app.route("/student/<int:id>")
-def student_profile_page(id):
-    return render_template("student_profile.html")
-
 # ------------------------------
-# API ROUTES
+# STUDENT APIs
 # ------------------------------
-
-# Get all students
 @app.route("/api/students", methods=["GET"])
 def get_students():
     conn = sqlite3.connect(DB_PATH)
@@ -69,81 +144,43 @@ def get_students():
     rows = c.fetchall()
     conn.close()
 
-    students = [{"id": r[0], "name": r[1], "roll": r[2], "branch": r[3], "year": r[4]} for r in rows]
-    return jsonify(students)
+    return jsonify([
+        {"id": r[0], "name": r[1], "roll": r[2], "branch": r[3], "year": r[4]}
+        for r in rows
+    ])
 
-# Get a single student
-@app.route("/api/students/<int:id>", methods=["GET"])
-def get_student(id):
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute("SELECT * FROM students WHERE id=?", (id,))
-    row = c.fetchone()
-    conn.close()
-
-    if not row:
-        return jsonify({"error": "Student not found"}), 404
-
-    student = {"id": row[0], "name": row[1], "roll": row[2], "branch": row[3], "year": row[4]}
-    return jsonify(student)
-
-# Add student
 @app.route("/api/students", methods=["POST"])
 def add_student():
-    data = request.json
-    if not all(k in data for k in ("name", "roll", "branch", "year")):
-        return jsonify({"error": "Missing fields"}), 400
+    if not is_admin():
+        return jsonify({"error": "Admin only"}), 403
 
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute("INSERT INTO students (name, roll, branch, year) VALUES (?, ?, ?, ?)",
-              (data["name"], data["roll"], data["branch"], data["year"]))
-    conn.commit()
-    conn.close()
-    return jsonify({"message": "Student added successfully"}), 201
-
-# Update student
-@app.route("/api/students/<int:id>", methods=["PUT"])
-def update_student(id):
     data = request.json
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("UPDATE students SET name=?, roll=?, branch=?, year=? WHERE id=?",
-              (data["name"], data["roll"], data["branch"], data["year"], id))
+    c.execute(
+        "INSERT INTO students (name, roll, branch, year) VALUES (?, ?, ?, ?)",
+        (data["name"], data["roll"], data["branch"], data["year"])
+    )
     conn.commit()
     conn.close()
-    return jsonify({"message": "Student updated successfully"})
+    return jsonify({"message": "Student added"})
 
-# Delete student
-@app.route("/api/students/<int:id>", methods=["DELETE"])
-def delete_student(id):
+# ------------------------------
+# ANALYTICS
+# ------------------------------
+@app.route("/api/students/analytics")
+def analytics():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("DELETE FROM students WHERE id=?", (id,))
-    conn.commit()
-    conn.close()
-    return jsonify({"message": "Student deleted successfully"})
 
-# Analytics route for dashboard charts
-@app.route("/api/students/analytics", methods=["GET"])
-def students_analytics():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    # Count students per branch
     c.execute("SELECT branch, COUNT(*) FROM students GROUP BY branch")
-    branch_counts = c.fetchall()
-    # Count students per year
+    branches = dict(c.fetchall())
+
     c.execute("SELECT year, COUNT(*) FROM students GROUP BY year")
-    year_counts = c.fetchall()
+    years = dict(c.fetchall())
+
     conn.close()
+    return jsonify({"branches": branches, "years": years})
 
-    return jsonify({
-        "branches": {b: count for b, count in branch_counts},
-        "years": {y: count for y, count in year_counts}
-    })
-
-# ------------------------------
-# Run app
-# ------------------------------
 if __name__ == "__main__":
     app.run(debug=True)
