@@ -215,6 +215,39 @@
                 fadeMessage();
             }
         });
+
+        function addStudent() {
+            const name = document.getElementById('studentName').value.trim();
+            const roll = document.getElementById('studentRoll').value.trim();
+            const branch = document.getElementById('studentBranch').value;
+            const year = document.getElementById('studentYear').value;
+
+            if (!name || !roll || !branch || !year) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            fetch('/api/students', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: name,
+                    roll: roll,
+                    branch: branch,
+                    year: year
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message) {
+                    alert('Student added successfully!');
+                    window.location.href = '/students';
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to add student'));
+                }
+            })
+            .catch(err => alert('Error: ' + err));
+        }
     </script>
 
 </body>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Student | Student Management</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body { background: #f4f6fb; margin: 0; }
+        main { padding: 35px 45px; }
+
+        .navbar {
+            background: linear-gradient(135deg, #31034e, #4a1174);
+            padding: 14px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+        }
+
+        .navbar-left { display: flex; align-items: center; gap: 12px; color: white; font-size: 20px; font-weight: 600; }
+        .navbar-left i { font-size: 26px; }
+        .nav-links { display: flex; gap: 22px; list-style: none; }
+        .nav-links a { color: white; text-decoration: none; font-size: 15px; padding: 6px 12px; border-radius: 6px; transition: 0.2s; }
+        .nav-links a:hover { background: rgba(255,255,255,0.15); }
+        .user-box { display: flex; align-items: center; gap: 14px; color: white; }
+        .role-badge { background: #ffb84a; color: #000; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .logout-btn { background: #ff4a60; color: white; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 14px; }
+
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0; }
+        .header h1 { color: #31034e; margin: 0; font-size: 28px; display: flex; align-items: center; gap: 12px; }
+        .back-btn { background: #31034e; color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; font-weight: 600; color: #31034e; margin-bottom: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; box-sizing: border-box; transition: 0.2s; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #31034e; box-shadow: 0 0 8px rgba(49, 3, 78, 0.1); }
+
+        .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; display: none; font-weight: 600; }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; display: block; }
+        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; display: block; }
+
+        .action-buttons { display: flex; gap: 12px; margin-top: 30px; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-save { background: #10b981; color: white; }
+        .btn-save:hover { opacity: 0.9; transform: translateY(-2px); }
+        .btn-delete { background: #ff4a60; color: white; }
+        .btn-delete:hover { opacity: 0.9; transform: translateY(-2px); }
+        .btn-back { background: #e0e0e0; color: #333; }
+        .btn-back:hover { background: #d0d0d0; }
+
+        .loading { text-align: center; padding: 40px; color: #999; }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar">
+    <div class="navbar-left">
+        <i class="fa-solid fa-graduation-cap"></i>
+        Student Management
+    </div>
+    <ul class="nav-links">
+        <li><a href="/"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+        <li><a href="/students"><i class="fa-solid fa-users"></i> Students</a></li>
+    </ul>
+    <div class="user-box">
+        <span><i class="fa-solid fa-user-circle"></i> {{ username }}</span>
+        <span class="role-badge">{{ session.get('role')|upper }}</span>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+</nav>
+
+<main>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <i class="fa-solid fa-edit" style="color: #31034e;"></i>
+                <span id="headerTitle">Loading...</span>
+            </h1>
+            <a href="/students" class="back-btn">
+                <i class="fa-solid fa-arrow-left"></i> Back
+            </a>
+        </div>
+
+        <div id="alert" class="alert"></div>
+
+        <form id="editForm">
+            <div class="form-group">
+                <label><i class="fa-solid fa-user"></i> Name</label>
+                <input type="text" id="studentName" required>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fa-solid fa-id-card"></i> Roll Number</label>
+                <input type="text" id="studentRoll" required>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fa-solid fa-building"></i> Branch</label>
+                <select id="studentBranch" required>
+                    <option value="">Select Branch</option>
+                    <option value="CSE">CSE</option>
+                    <option value="ECE">ECE</option>
+                    <option value="ME">ME</option>
+                    <option value="CE">CE</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fa-solid fa-calendar"></i> Year</label>
+                <select id="studentYear" required>
+                    <option value="">Select Year</option>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                </select>
+            </div>
+
+            <div class="action-buttons">
+                <button type="submit" class="btn btn-save">
+                    <i class="fa-solid fa-save"></i> Save Changes
+                </button>
+                <button type="button" class="btn btn-delete" onclick="deleteStudent()">
+                    <i class="fa-solid fa-trash"></i> Delete
+                </button>
+                <a href="/students" class="btn btn-back">
+                    <i class="fa-solid fa-arrow-left"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script>
+const studentId = window.location.pathname.split('/')[2];
+
+function showAlert(message, type) {
+    const alert = document.getElementById('alert');
+    alert.textContent = message;
+    alert.className = `alert alert-${type}`;
+    setTimeout(() => {
+        alert.className = 'alert';
+    }, 4000);
+}
+
+function loadStudent() {
+    fetch(`/api/students/${studentId}`)
+        .then(res => {
+            if (!res.ok) throw new Error('Student not found');
+            return res.json();
+        })
+        .then(data => {
+            document.getElementById('headerTitle').textContent = data.name;
+            document.getElementById('studentName').value = data.name;
+            document.getElementById('studentRoll').value = data.roll;
+            document.getElementById('studentBranch').value = data.branch;
+            document.getElementById('studentYear').value = data.year;
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            showAlert('Failed to load student information', 'error');
+        });
+}
+
+document.getElementById('editForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('studentName').value.trim();
+    const roll = document.getElementById('studentRoll').value.trim();
+    const branch = document.getElementById('studentBranch').value;
+    const year = document.getElementById('studentYear').value;
+
+    if (!name || !roll || !branch || !year) {
+        showAlert('Please fill all fields', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/students/${studentId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: name,
+                roll: roll,
+                branch: branch,
+                year: year
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showAlert('Student updated successfully!', 'success');
+            document.getElementById('headerTitle').textContent = name;
+            setTimeout(() => {
+                window.location.href = '/students';
+            }, 1500);
+        } else {
+            showAlert(data.error || 'Failed to update student', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('An error occurred. Please try again.', 'error');
+    }
+});
+
+function deleteStudent() {
+    if (!confirm('Are you sure you want to delete this student? This action cannot be undone.')) {
+        return;
+    }
+
+    fetch(`/api/students/${studentId}`, {
+        method: 'DELETE'
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.message) {
+            alert('Student deleted successfully');
+            window.location.href = '/students';
+        } else {
+            showAlert(data.error || 'Failed to delete student', 'error');
+        }
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        showAlert('An error occurred while deleting', 'error');
+    });
+}
+
+loadStudent();
+</script>
+
+</body>
+</html>

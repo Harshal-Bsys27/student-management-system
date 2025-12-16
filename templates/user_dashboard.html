@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard | Student Management</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body { background: #f4f6fb; margin: 0; }
+        main { padding: 35px 45px; }
+
+        .navbar {
+            background: linear-gradient(135deg, #31034e, #4a1174);
+            padding: 14px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+        }
+
+        .navbar-left { display: flex; align-items: center; gap: 12px; color: white; font-size: 20px; font-weight: 600; }
+        .navbar-left i { font-size: 26px; }
+        .nav-links { display: flex; gap: 22px; list-style: none; }
+        .nav-links a { color: white; text-decoration: none; font-size: 15px; padding: 6px 12px; border-radius: 6px; transition: 0.2s; }
+        .nav-links a:hover { background: rgba(255,255,255,0.15); }
+        .user-box { display: flex; align-items: center; gap: 14px; color: white; }
+        .role-badge { background: #4a9eff; color: white; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .logout-btn { background: #ff4a60; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 14px; }
+
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .welcome { font-size: 26px; font-weight: 600; color: #31034e; }
+
+        .cards { display: flex; gap: 25px; flex-wrap: wrap; margin-bottom: 30px; }
+        .card { background: white; padding: 22px; border-radius: 14px; width: 260px; box-shadow: 0 5px 18px rgba(0,0,0,0.12); }
+        .card h3 { color: #31034e; margin-bottom: 8px; font-size: 14px; text-transform: uppercase; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .card p { font-size: 28px; font-weight: 700; color: #4a1174; margin: 0; }
+
+        .permission-notice { background: #e7f3ff; border-left: 4px solid #4a9eff; padding: 15px 20px; border-radius: 6px; margin-bottom: 25px; color: #0066cc; font-size: 14px; }
+
+        .section { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        .section h2 { color: #31034e; margin-top: 0; font-size: 20px; display: flex; align-items: center; gap: 10px; }
+
+        .charts-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px; margin-top: 20px; }
+        .chart-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .chart-card h3 { color: #31034e; margin-top: 0; margin-bottom: 15px; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+
+        .chart-wrapper { position: relative; width: 100%; height: 300px; }
+        canvas { width: 100% !important; height: 100% !important; }
+
+        .action-btn { display: inline-block; padding: 10px 20px; background: #4a1174; color: white; border-radius: 8px; text-decoration: none; margin-right: 10px; margin-bottom: 10px; transition: 0.2s; }
+        .action-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        thead { background: #f0f0f0; }
+        thead th { padding: 12px; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; }
+        tbody td { padding: 12px; border-bottom: 1px solid #eee; }
+        tbody tr:hover { background: #f9f9f9; }
+
+        .empty-state { text-align: center; padding: 40px; color: #999; }
+        .empty-state i { font-size: 48px; margin-bottom: 15px; color: #ddd; }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar">
+    <div class="navbar-left">
+        <i class="fa-solid fa-graduation-cap"></i> Student Dashboard
+    </div>
+    <ul class="nav-links">
+        <li><a href="/user/dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+        <li><a href="/students"><i class="fa-solid fa-users"></i> All Students</a></li>
+    </ul>
+    <div class="user-box">
+        <span><i class="fa-solid fa-user-circle"></i> {{ username }}</span>
+        <span class="role-badge">{{ session.get('role')|upper }}</span>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+</nav>
+
+<main>
+    <div class="page-header">
+        <div class="welcome">Welcome, {{ username }} 👋</div>
+    </div>
+
+    <div class="permission-notice">
+        <i class="fa-solid fa-info-circle"></i> 
+        You have <strong>read-only access</strong> to view all student information. Click on any student name from the list to see their detailed attendance and grades.
+    </div>
+
+    <!-- QUICK STATS -->
+    <div class="cards">
+        <div class="card">
+            <h3><i class="fa-solid fa-book"></i> Total Students</h3>
+            <p id="totalStudents">0</p>
+        </div>
+        <div class="card">
+            <h3><i class="fa-solid fa-building"></i> Total Branches</h3>
+            <p id="totalBranches">0</p>
+        </div>
+        <div class="card">
+            <h3><i class="fa-solid fa-users"></i> Total Users</h3>
+            <p id="totalUsers">0</p>
+        </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="section">
+        <h2><i class="fa-solid fa-chart-line"></i> Distribution Analytics</h2>
+        <div class="charts-section">
+            <div class="chart-card">
+                <h3><i class="fa-solid fa-chart-column" style="color: #667eea;"></i> Students by Branch</h3>
+                <div class="chart-wrapper">
+                    <canvas id="branchChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3><i class="fa-solid fa-chart-pie" style="color: #ff6b6b;"></i> Students by Year</h3>
+                <div class="chart-wrapper">
+                    <canvas id="yearChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK ACCESS -->
+    <div class="section">
+        <h2><i class="fa-solid fa-circle-info"></i> Quick Access</h2>
+        <p style="color: #666; margin-bottom: 15px;">View detailed student information including attendance and grades:</p>
+        <a href="/students" class="action-btn">
+            <i class="fa-solid fa-users"></i> Go to Students List
+        </a>
+    </div>
+
+    <!-- SYSTEM OVERVIEW -->
+    <div class="section">
+        <h2><i class="fa-solid fa-database"></i> System Overview</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><i class="fa-solid fa-book"></i> Total Students</td>
+                    <td id="stat-students">-</td>
+                </tr>
+                <tr>
+                    <td><i class="fa-solid fa-building"></i> Total Branches</td>
+                    <td id="stat-branches">-</td>
+                </tr>
+                <tr>
+                    <td><i class="fa-solid fa-users"></i> Total Users</td>
+                    <td id="stat-users">-</td>
+                </tr>
+                <tr>
+                    <td><i class="fa-solid fa-clipboard"></i> Attendance Records</td>
+                    <td id="stat-attendance">-</td>
+                </tr>
+                <tr>
+                    <td><i class="fa-solid fa-award"></i> Grades Records</td>
+                    <td id="stat-grades">-</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<script>
+console.log("User dashboard loading...");
+
+let branchChart, yearChart;
+
+// Load basic stats
+fetch('/api/students')
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('totalStudents').textContent = data.length;
+        document.getElementById('stat-students').textContent = data.length;
+        
+        const branches = new Set(data.map(s => s.branch)).size;
+        document.getElementById('totalBranches').textContent = branches;
+        document.getElementById('stat-branches').textContent = branches;
+
+        return fetch('/api/students/analytics');
+    })
+    .then(res => res.json())
+    .then(stats => {
+        console.log("Analytics data:", stats);
+
+        if (!stats.branches || !stats.years) {
+            console.warn("No analytics data");
+            return;
+        }
+
+        // Branch Chart
+        const branchCanvas = document.getElementById('branchChart');
+        branchChart = new Chart(branchCanvas, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(stats.branches),
+                datasets: [{
+                    label: 'Number of Students',
+                    data: Object.values(stats.branches),
+                    backgroundColor: [
+                        '#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b'
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 2,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { 
+                        display: true, 
+                        labels: { font: { size: 12, weight: 600 }, color: '#374151' }
+                    }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        ticks: { color: '#9ca3af' },
+                        grid: { color: '#e5e7eb' }
+                    },
+                    x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+                }
+            }
+        });
+
+        // Year Chart
+        const yearCanvas = document.getElementById('yearChart');
+        yearChart = new Chart(yearCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(stats.years),
+                datasets: [{
+                    data: Object.values(stats.years),
+                    backgroundColor: [
+                        '#ff6b6b', '#ffd93d', '#6bcf7f', '#4d96ff', '#a78bfa'
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { 
+                        display: true, 
+                        position: 'bottom',
+                        labels: { font: { size: 12, weight: 600 }, color: '#374151', padding: 20 }
+                    }
+                }
+            }
+        });
+
+        console.log("Charts initialized");
+    })
+    .catch(err => console.error('Error loading analytics:', err));
+
+// Load user stats (if admin can see)
+fetch('/api/users')
+    .then(res => {
+        if (!res.ok) throw new Error('Not admin');
+        return res.json();
+    })
+    .then(data => {
+        document.getElementById('totalUsers').textContent = data.length;
+        document.getElementById('stat-users').textContent = data.length;
+    })
+    .catch(err => {
+        // User is not admin, that's fine
+        document.getElementById('totalUsers').textContent = 'N/A';
+        document.getElementById('stat-users').textContent = 'N/A';
+    });
+
+// Load database stats
+fetch('/api/debug/db-status')
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('stat-attendance').textContent = data.attendance || 0;
+        document.getElementById('stat-grades').textContent = data.grades || 0;
+    })
+    .catch(err => {
+        document.getElementById('stat-attendance').textContent = '-';
+        document.getElementById('stat-grades').textContent = '-';
+    });
+</script>
+
+</body>
+</html>

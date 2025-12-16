@@ -1,148 +1,819 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Student Profile</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <style>
-    .profile-container { max-width:800px; margin:40px auto; padding:24px; background:#fff; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
-    .profile-head { display:flex; justify-content:space-between; align-items:center; }
-    .profile-fields { margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    label{font-weight:600; color:#333; display:block; font-size:14px}
-    input{width:100%; padding:8px; border-radius:6px; border:1px solid #ccc}
-    .actions{margin-top:18px; display:flex; gap:12px}
-    .btn{padding:10px 14px; border-radius:6px; border:none; cursor:pointer}
-    .btn-save{background:#076235;color:white}
-    .btn-del{background:#d9534f;color:white}
-    .btn-back{background:#eee;color:#333}
-    .message{margin-top:12px; font-weight:600}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile | Student Management</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body { background: #f4f6fb; margin: 0; }
+        main { padding: 35px 45px; }
+
+        .navbar {
+            background: linear-gradient(135deg, #31034e, #4a1174);
+            padding: 14px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+        }
+
+        .navbar-left { display: flex; align-items: center; gap: 12px; color: white; font-size: 20px; font-weight: 600; }
+        .navbar-left i { font-size: 26px; }
+        .nav-links { display: flex; gap: 22px; list-style: none; }
+        .nav-links a { color: white; text-decoration: none; font-size: 15px; padding: 6px 12px; border-radius: 6px; transition: 0.2s; }
+        .nav-links a:hover { background: rgba(255,255,255,0.15); }
+        .user-box { display: flex; align-items: center; gap: 14px; color: white; }
+        .role-badge { background: #ffb84a; color: #000; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .logout-btn { background: #ff4a60; color: white; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 14px; }
+
+        .profile-container { max-width: 1000px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .profile-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0; }
+        .profile-header h1 { color: #31034e; margin: 0; font-size: 28px; display: flex; align-items: center; gap: 12px; }
+        .back-btn { background: #31034e; color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+
+        .tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid #eee; }
+        .tab-btn { background: none; border: none; padding: 12px 20px; cursor: pointer; font-weight: 600; color: #999; border-bottom: 3px solid transparent; transition: 0.2s; }
+        .tab-btn.active { color: #31034e; border-bottom-color: #31034e; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .profile-field { margin-bottom: 25px; }
+        .profile-field label { display: block; font-weight: 600; color: #31034e; margin-bottom: 8px; font-size: 14px; text-transform: uppercase; }
+        .profile-field-value { background: #f9f9f9; padding: 12px 16px; border-radius: 8px; font-size: 16px; color: #333; border-left: 4px solid #31034e; }
+
+        .branch-badge { display: inline-block; padding: 6px 12px; border-radius: 6px; font-weight: 600; color: white; }
+        .branch-cse { background: #6366f1; } .branch-ece { background: #ec4899; } .branch-me { background: #f59e0b; } .branch-ce { background: #10b981; }
+
+        .add-form { background: #f9f9f9; padding: 20px; border-radius: 12px; margin-bottom: 30px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 5px; color: #333; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #31034e; }
+
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .btn-primary { background: #31034e; color: white; }
+        .btn-primary:hover { opacity: 0.9; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        thead { background: #f0f0f0; }
+        thead th { padding: 12px; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; }
+        tbody td { padding: 12px; border-bottom: 1px solid #eee; }
+        tbody tr:hover { background: #f9f9f9; }
+
+        .status-present { background: #d4edda; color: #155724; padding: 4px 10px; border-radius: 4px; font-weight: 600; }
+        .status-absent { background: #f8d7da; color: #721c24; padding: 4px 10px; border-radius: 4px; font-weight: 600; }
+
+        .grade-a { background: #10b981; } .grade-b { background: #f59e0b; } .grade-c { background: #ef4444; }
+        .grade-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-weight: 600; color: white; }
+
+        .empty-state { text-align: center; padding: 30px; color: #999; }
+
+        .summary-box { margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px; }
+        .summary-box strong { color: #31034e; }
+        .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 10px; }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .modal-box { background: white; margin: 10% auto; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+        .modal-box h2 { color: #31034e; margin-top: 0; }
+        .btn-edit-sm { background: #4a60ff; color: white; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-delete-sm { background: #ff4a60; color: white; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; }
+    </style>
 </head>
+
 <body>
-  <nav class="navbar">
-      <div class="logo"><h3>Student Management</h3></div>
-      <ul class="nav-links">
-          <li><a href="/">Dashboard</a></li>
-          <li><a href="/students">Students</a></li>
-          <li><a href="/add_student">Add Student</a></li>
-      </ul>
-  </nav>
 
-  <div class="profile-container">
-    <div class="profile-head">
-      <h2 id="profile-name">Loading...</h2>
-      <div>
-        <button class="btn btn-back" onclick="location.href='/students'">← Back</button>
-      </div>
+<nav class="navbar">
+    <div class="navbar-left">
+        <i class="fa-solid fa-graduation-cap"></i>
+        Student Management
     </div>
 
-    <div class="profile-fields">
-      <div>
-        <label>Name</label>
-        <input id="inp-name" type="text" />
-      </div>
-      <div>
-        <label>Roll</label>
-        <input id="inp-roll" type="text" />
-      </div>
-      <div>
-        <label>Branch</label>
-        <input id="inp-branch" type="text" />
-      </div>
-      <div>
-        <label>Year</label>
-        <input id="inp-year" type="text" />
-      </div>
-    </div>
+    <ul class="nav-links">
+        <li><a href="/"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+        <li><a href="/students"><i class="fa-solid fa-users"></i> Students</a></li>
+    </ul>
 
-    <div class="actions">
-      <button class="btn btn-save" id="saveBtn">Save Changes</button>
-      <button class="btn btn-del" id="deleteBtn">Delete Student</button>
-      <div id="msg" class="message"></div>
+    <div class="user-box">
+        <span><i class="fa-solid fa-user-circle"></i> {{ username }}</span>
+        <span class="role-badge">{{ session.get('role')|upper }}</span>
+        <a href="/logout" class="logout-btn">Logout</a>
     </div>
-  </div>
+</nav>
+
+<main>
+    <div class="profile-container">
+        <div class="profile-header">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div id="profilePictureContainer" style="position: relative;">
+                    <div id="profileAvatarDefault" 
+                         style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-size: 40px; font-weight: 600; border: 3px solid #31034e;">
+                        <span id="avatarInitials">--</span>
+                    </div>
+                    <img id="profilePicture" src="" 
+                         alt="Profile Picture" 
+                         style="display: none; width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #31034e;">
+                    
+                    {% if session.get('role') == 'admin' %}
+                    <label for="pictureInput" style="position: absolute; bottom: 0; right: 0; background: #31034e; color: white; padding: 6px 8px; border-radius: 50%; cursor: pointer; font-size: 14px; border: 2px solid white; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;">
+                        <i class="fa-solid fa-camera"></i>
+                    </label>
+                    <input type="file" id="pictureInput" accept="image/*" style="display: none;">
+                    {% endif %}
+                </div>
+                <div>
+                    <h1 style="color: #31034e; margin: 0; font-size: 28px; display: flex; align-items: center; gap: 12px;">
+                        <i class="fa-solid fa-user" style="color: #31034e;"></i>
+                        <span id="studentName">Loading...</span>
+                    </h1>
+                </div>
+            </div>
+            <a href="/students" class="back-btn">
+                <i class="fa-solid fa-arrow-left"></i> Back
+            </a>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab(event, 'info')">
+                <i class="fa-solid fa-info-circle"></i> Info
+            </button>
+            <button class="tab-btn" onclick="switchTab(event, 'attendance')">
+                <i class="fa-solid fa-clipboard"></i> Attendance
+            </button>
+            <button class="tab-btn" onclick="switchTab(event, 'grades')">
+                <i class="fa-solid fa-award"></i> Grades
+            </button>
+        </div>
+
+        <!-- INFO TAB -->
+        <div id="info" class="tab-content active">
+            <div class="profile-field">
+                <label><i class="fa-solid fa-user"></i> Name</label>
+                <div class="profile-field-value" id="fieldName">Loading...</div>
+            </div>
+            <div class="profile-field">
+                <label><i class="fa-solid fa-id-card"></i> Roll Number</label>
+                <div class="profile-field-value" id="fieldRoll">Loading...</div>
+            </div>
+            <div class="profile-field">
+                <label><i class="fa-solid fa-building"></i> Branch</label>
+                <div class="profile-field-value" id="fieldBranch">Loading...</div>
+            </div>
+            <div class="profile-field">
+                <label><i class="fa-solid fa-calendar"></i> Year</label>
+                <div class="profile-field-value" id="fieldYear">Loading...</div>
+            </div>
+        </div>
+
+        <!-- ATTENDANCE TAB -->
+        <div id="attendance" class="tab-content">
+            {% if session.get('role') == 'admin' %}
+            <div class="add-form">
+                <h3><i class="fa-solid fa-plus"></i> Mark Attendance</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="attendanceDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="attendanceStatus">
+                            <option value="">Select Status</option>
+                            <option value="Present">Present</option>
+                            <option value="Absent">Absent</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: flex-end;">
+                        <button class="btn btn-primary" onclick="markAttendance()" style="width: 100%;">
+                            <i class="fa-solid fa-check"></i> Mark
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <h3>Attendance Record</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Marked By</th>
+                        {% if session.get('role') == 'admin' %}
+                        <th>Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody id="attendanceList">
+                    <tr><td colspan="{% if session.get('role') == 'admin' %}4{% else %}3{% endif %}" class="empty-state">Loading...</td></tr>
+                </tbody>
+            </table>
+
+            <div class="summary-box">
+                <strong>Attendance Summary:</strong>
+                <div class="summary-grid">
+                    <div><strong>Present:</strong> <span id="presentCount">0</span></div>
+                    <div><strong>Absent:</strong> <span id="absentCount">0</span></div>
+                    <div><strong>Percentage:</strong> <span id="attendancePercentage">0%</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRADES TAB -->
+        <div id="grades" class="tab-content">
+            {% if session.get('role') == 'admin' %}
+            <div class="add-form">
+                <h3><i class="fa-solid fa-plus"></i> Add Grade</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <input type="text" id="gradeSubject" placeholder="e.g., Mathematics">
+                    </div>
+                    <div class="form-group">
+                        <label>Marks</label>
+                        <input type="number" id="gradeMarks" min="0" max="100" placeholder="0-100">
+                    </div>
+                    <div class="form-group">
+                        <label>Semester</label>
+                        <select id="gradeSemester">
+                            <option value="">Select Semester</option>
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                            <option value="3">Semester 3</option>
+                            <option value="4">Semester 4</option>
+                            <option value="5">Semester 5</option>
+                            <option value="6">Semester 6</option>
+                            <option value="7">Semester 7</option>
+                            <option value="8">Semester 8</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: flex-end;">
+                        <button class="btn btn-primary" onclick="addGrade()" style="width: 100%;">
+                            <i class="fa-solid fa-plus"></i> Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <h3>Grades Record</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Marks</th>
+                        <th>Grade</th>
+                        <th>Semester</th>
+                        {% if session.get('role') == 'admin' %}
+                        <th>Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody id="gradesList">
+                    <tr><td colspan="{% if session.get('role') == 'admin' %}5{% else %}4{% endif %}" class="empty-state">Loading...</td></tr>
+                </tbody>
+            </table>
+
+            <div class="summary-box">
+                <strong>Grade Summary:</strong>
+                <div class="summary-grid">
+                    <div><strong>Total Subjects:</strong> <span id="totalSubjects">0</span></div>
+                    <div><strong>Average Marks:</strong> <span id="averageMarks">0</span></div>
+                    <div><strong>Grade Point:</strong> <span id="gpa">0</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- EDIT ATTENDANCE MODAL -->
+<div id="editAttendanceModal" class="modal" style="display: none;">
+    <div class="modal-box">
+        <h2>Edit Attendance</h2>
+        <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="editAttendanceDate">
+        </div>
+        <div class="form-group">
+            <label>Status</label>
+            <select id="editAttendanceStatus">
+                <option value="Present">Present</option>
+                <option value="Absent">Absent</option>
+            </select>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button class="btn btn-primary" onclick="saveAttendance()" style="flex: 1;">Save</button>
+            <button class="btn" style="flex: 1; background: #ddd; color: #333;" onclick="closeEditAttendanceModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT GRADE MODAL -->
+<div id="editGradeModal" class="modal" style="display: none;">
+    <div class="modal-box">
+        <h2>Edit Grade</h2>
+        <div class="form-group">
+            <label>Subject</label>
+            <input type="text" id="editGradeSubject" readonly>
+        </div>
+        <div class="form-group">
+            <label>Marks</label>
+            <input type="number" id="editGradeMarks" min="0" max="100">
+        </div>
+        <div class="form-group">
+            <label>Semester</label>
+            <input type="text" id="editGradeSemester" readonly>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button class="btn btn-primary" onclick="saveGrade()" style="flex: 1;">Save</button>
+            <button class="btn" style="flex: 1; background: #ddd; color: #333;" onclick="closeEditGradeModal()">Cancel</button>
+        </div>
+    </div>
+</div>
 
 <script>
-  // Extract id from URL: /student/<id>
-  const pathParts = location.pathname.split('/');
-  const studentId = parseInt(pathParts[pathParts.length - 1], 10);
+console.log("Student profile page loading");
+const studentId = window.location.pathname.split('/')[2];
+console.log("Student ID:", studentId);
 
-  async function showMessage(text, color='green') {
-    const el = document.getElementById('msg');
-    el.style.color = color;
-    el.textContent = text;
-    setTimeout(()=> el.textContent = '', 3000);
-  }
+let editingAttendanceId = null;
+let editingGradeId = null;
 
-  async function loadStudent() {
-    try {
-      const res = await fetch(`/api/students/${studentId}`);
-      if (!res.ok) {
-        showMessage('Student not found', 'red');
+function getInitials(name) {
+    return name
+        .split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase()
+        .substring(0, 2);
+}
+
+function getColorForInitials(name) {
+    const colors = [
+        'linear-gradient(135deg, #667eea, #764ba2)',
+        'linear-gradient(135deg, #f093fb, #f5576c)',
+        'linear-gradient(135deg, #4facfe, #00f2fe)',
+        'linear-gradient(135deg, #43e97b, #38f9d7)',
+        'linear-gradient(135deg, #fa709a, #fee140)',
+        'linear-gradient(135deg, #30cfd0, #330867)',
+        'linear-gradient(135deg, #a8edea, #fed6e3)',
+        'linear-gradient(135deg, #ff9466, #ff6a88)',
+    ];
+    
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+}
+
+function switchTab(event, tabName) {
+    console.log("Switching to tab:", tabName);
+    
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    
+    document.getElementById(tabName).classList.add('active');
+    event.target.closest('.tab-btn').classList.add('active');
+
+    if (tabName === 'attendance') loadAttendance();
+    if (tabName === 'grades') loadGrades();
+}
+
+function loadStudent() {
+    console.log("Loading student data for ID:", studentId);
+    
+    fetch(`/api/students/${studentId}`)
+        .then(res => {
+            console.log("Student fetch status:", res.status);
+            if (!res.ok) throw new Error('Student not found');
+            return res.json();
+        })
+        .then(data => {
+            console.log("Student data:", data);
+            
+            document.getElementById('studentName').textContent = data.name;
+            document.getElementById('fieldName').textContent = data.name;
+            document.getElementById('fieldRoll').textContent = data.roll;
+            
+            const branchMap = {
+                'CSE': 'branch-cse',
+                'ECE': 'branch-ece',
+                'ME': 'branch-me',
+                'CE': 'branch-ce'
+            };
+            
+            const branchClass = branchMap[data.branch] || 'branch-cse';
+            document.getElementById('fieldBranch').innerHTML = 
+                `<span class="branch-badge ${branchClass}">${data.branch}</span>`;
+            document.getElementById('fieldYear').textContent = data.year;
+            
+            // Setup avatar
+            const initials = getInitials(data.name);
+            const color = getColorForInitials(data.name);
+            document.getElementById('avatarInitials').textContent = initials;
+            document.getElementById('profileAvatarDefault').style.background = color;
+            
+            // Load profile picture if exists
+            if (data.profile_picture) {
+                const picUrl = `/static/uploads/profiles/${data.profile_picture}`;
+                document.getElementById('profilePicture').src = picUrl;
+                
+                // Check if image exists and loads properly
+                document.getElementById('profilePicture').onload = function() {
+                    console.log("Profile picture loaded successfully");
+                    document.getElementById('profilePicture').style.display = 'block';
+                    document.getElementById('profileAvatarDefault').style.display = 'none';
+                };
+                
+                document.getElementById('profilePicture').onerror = function() {
+                    console.warn("Profile picture not found:", picUrl);
+                    document.getElementById('profilePicture').style.display = 'none';
+                    document.getElementById('profileAvatarDefault').style.display = 'flex';
+                };
+            }
+            
+            console.log("Student info loaded successfully");
+        })
+        .catch(err => {
+            console.error('Error loading student:', err);
+            document.getElementById('studentName').textContent = 'Error Loading';
+            alert('Failed to load student information: ' + err.message);
+        });
+}
+
+// Profile Picture Upload
+const pictureInput = document.getElementById('pictureInput');
+if (pictureInput) {
+    pictureInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        fetch(`/api/students/${studentId}/profile-picture`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.message) {
+                alert('Profile picture uploaded successfully');
+                document.getElementById('profilePicture').src = data.url;
+                document.getElementById('profilePicture').style.display = 'block';
+                document.getElementById('profileAvatarDefault').style.display = 'none';
+                pictureInput.value = '';
+            } else {
+                alert('Error: ' + (data.error || 'Failed to upload'));
+            }
+        })
+        .catch(err => alert('Error: ' + err));
+    });
+}
+
+function loadAttendance() {
+    console.log("Loading attendance for student:", studentId);
+    
+    fetch(`/api/attendance/student/${studentId}`)
+        .then(res => {
+            console.log("Attendance fetch status:", res.status);
+            if (!res.ok) throw new Error('Failed to load attendance');
+            return res.json();
+        })
+        .then(data => {
+            console.log("Attendance data:", data.length, "records");
+            
+            const tbody = document.getElementById('attendanceList');
+            const isAdmin = '{{ session.get("role") }}' === 'admin';
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${isAdmin ? 4 : 3}" class="empty-state">No attendance records</td></tr>`;
+                document.getElementById('presentCount').textContent = '0';
+                document.getElementById('absentCount').textContent = '0';
+                document.getElementById('attendancePercentage').textContent = '0%';
+                return;
+            }
+
+            tbody.innerHTML = data.map(a => {
+                const actions = isAdmin ? `
+                    <td>
+                        <button class="btn-edit-sm" onclick="openEditAttendanceModal(${a.id}, '${a.date}', '${a.status}')">
+                            <i class="fa-solid fa-edit"></i> Edit
+                        </button>
+                        <button class="btn-delete-sm" onclick="deleteAttendance(${a.id})">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                    </td>
+                ` : '';
+                
+                return `
+                    <tr>
+                        <td>${a.date}</td>
+                        <td><span class="status-${a.status.toLowerCase()}">${a.status}</span></td>
+                        <td>${a.marked_by}</td>
+                        ${actions}
+                    </tr>
+                `;
+            }).join('');
+
+            const present = data.filter(a => a.status === 'Present').length;
+            const absent = data.filter(a => a.status === 'Absent').length;
+            const percentage = data.length > 0 ? Math.round((present / data.length) * 100) : 0;
+
+            document.getElementById('presentCount').textContent = present;
+            document.getElementById('absentCount').textContent = absent;
+            document.getElementById('attendancePercentage').textContent = percentage + '%';
+            
+            console.log("Attendance loaded:", present, "present,", absent, "absent");
+        })
+        .catch(err => {
+            console.error('Error loading attendance:', err);
+            document.getElementById('attendanceList').innerHTML = 
+                '<tr><td colspan="4" class="empty-state">Error loading attendance</td></tr>';
+        });
+}
+
+function loadGrades() {
+    console.log("Loading grades for student:", studentId);
+    
+    fetch(`/api/grades/student/${studentId}`)
+        .then(res => {
+            console.log("Grades fetch status:", res.status);
+            if (!res.ok) throw new Error('Failed to load grades');
+            return res.json();
+        })
+        .then(data => {
+            console.log("Grades data:", data.length, "records");
+            
+            const tbody = document.getElementById('gradesList');
+            const isAdmin = '{{ session.get("role") }}' === 'admin';
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${isAdmin ? 5 : 4}" class="empty-state">No grades recorded</td></tr>`;
+                document.getElementById('totalSubjects').textContent = '0';
+                document.getElementById('averageMarks').textContent = '0';
+                document.getElementById('gpa').textContent = '0';
+                return;
+            }
+
+            tbody.innerHTML = data.map(g => {
+                const gradeClass = g.grade.startsWith('A') ? 'grade-a' : 
+                                 (g.grade.startsWith('B') ? 'grade-b' : 'grade-c');
+                
+                const actions = isAdmin ? `
+                    <td>
+                        <button class="btn-edit-sm" onclick="openEditGradeModal(${g.id}, '${g.subject}', ${g.marks}, '${g.semester}')">
+                            <i class="fa-solid fa-edit"></i> Edit
+                        </button>
+                        <button class="btn-delete-sm" onclick="deleteGrade(${g.id})">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                    </td>
+                ` : '';
+                
+                return `
+                    <tr>
+                        <td>${g.subject}</td>
+                        <td>${g.marks}</td>
+                        <td><span class="grade-badge ${gradeClass}">${g.grade}</span></td>
+                        <td>Sem ${g.semester}</td>
+                        ${actions}
+                    </tr>
+                `;
+            }).join('');
+
+            const average = data.length > 0 ? (data.reduce((sum, g) => sum + g.marks, 0) / data.length).toFixed(2) : 0;
+            document.getElementById('totalSubjects').textContent = data.length;
+            document.getElementById('averageMarks').textContent = average;
+            
+            // Calculate GPA (10-point scale)
+            let totalGPA = 0;
+            data.forEach(g => {
+                if (g.grade === 'A+') totalGPA += 10;
+                else if (g.grade === 'A') totalGPA += 9;
+                else if (g.grade === 'B') totalGPA += 8;
+                else if (g.grade === 'C') totalGPA += 7;
+                else if (g.grade === 'D') totalGPA += 6;
+                else if (g.grade === 'F') totalGPA += 0;
+            });
+            const gpa = (totalGPA / data.length).toFixed(2);
+            document.getElementById('gpa').textContent = gpa;
+            
+            console.log("Grades loaded:", data.length, "subjects, average:", average, "GPA:", gpa);
+        })
+        .catch(err => {
+            console.error('Error loading grades:', err);
+            document.getElementById('gradesList').innerHTML = 
+                '<tr><td colspan="5" class="empty-state">Error loading grades</td></tr>';
+        });
+}
+
+function markAttendance() {
+    const date = document.getElementById('attendanceDate').value;
+    const status = document.getElementById('attendanceStatus').value;
+
+    if (!date || !status) {
+        alert('Please select date and status');
         return;
-      }
-      const s = await res.json();
-      document.getElementById('profile-name').textContent = s.name;
-      document.getElementById('inp-name').value = s.name;
-      document.getElementById('inp-roll').value = s.roll;
-      document.getElementById('inp-branch').value = s.branch;
-      document.getElementById('inp-year').value = s.year;
-    } catch (err) {
-      console.error(err);
-      showMessage('Error loading student', 'red');
     }
-  }
 
-  document.getElementById('saveBtn').addEventListener('click', async () => {
-    const payload = {
-      name: document.getElementById('inp-name').value.trim(),
-      roll: document.getElementById('inp-roll').value.trim(),
-      branch: document.getElementById('inp-branch').value.trim(),
-      year: document.getElementById('inp-year').value.trim()
-    };
-    // Basic frontend validation
-    if (!payload.name || !payload.roll) {
-      showMessage('Name and Roll are required', 'red'); return;
+    fetch('/api/attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            student_id: studentId,
+            date: date,
+            status: status
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.message) {
+            alert('Attendance marked successfully');
+            document.getElementById('attendanceDate').value = '';
+            document.getElementById('attendanceStatus').value = '';
+            loadAttendance();
+        } else {
+            alert('Error: ' + (data.error || 'Failed to mark attendance'));
+        }
+    })
+    .catch(err => alert('Error: ' + err));
+}
+
+function openEditAttendanceModal(id, date, status) {
+    editingAttendanceId = id;
+    document.getElementById('editAttendanceDate').value = date;
+    document.getElementById('editAttendanceStatus').value = status;
+    document.getElementById('editAttendanceModal').style.display = 'block';
+}
+
+function closeEditAttendanceModal() {
+    document.getElementById('editAttendanceModal').style.display = 'none';
+    editingAttendanceId = null;
+}
+
+function saveAttendance() {
+    const date = document.getElementById('editAttendanceDate').value;
+    const status = document.getElementById('editAttendanceStatus').value;
+
+    fetch('/api/attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            student_id: studentId,
+            date: date,
+            status: status
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.message) {
+            alert('Attendance updated successfully');
+            closeEditAttendanceModal();
+            loadAttendance();
+        } else {
+            alert('Error: ' + (data.error || 'Failed to update'));
+        }
+    })
+    .catch(err => alert('Error: ' + err));
+}
+
+function deleteAttendance(id) {
+    if (!confirm('Are you sure you want to delete this attendance record?')) return;
+    
+    fetch(`/api/attendance/${id}`, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+            if (data.message) {
+                alert('Attendance deleted successfully');
+                loadAttendance();
+            } else {
+                alert('Error: ' + (data.error || 'Failed to delete'));
+            }
+        })
+        .catch(err => alert('Error: ' + err));
+}
+
+function addGrade() {
+    const subject = document.getElementById('gradeSubject').value.trim();
+    const marks = document.getElementById('gradeMarks').value;
+    const semester = document.getElementById('gradeSemester').value;
+
+    if (!subject || !marks || !semester) {
+        alert('Please fill all fields');
+        return;
     }
-    try {
-      const res = await fetch(`/api/students/${studentId}`, {
+
+    fetch('/api/grades', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            student_id: studentId,
+            subject: subject,
+            marks: parseFloat(marks),
+            semester: semester
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.message) {
+            alert('Grade added successfully! Grade: ' + data.grade);
+            document.getElementById('gradeSubject').value = '';
+            document.getElementById('gradeMarks').value = '';
+            document.getElementById('gradeSemester').value = '';
+            loadGrades();
+        } else {
+            alert('Error: ' + (data.error || 'Failed to add grade'));
+        }
+    })
+    .catch(err => alert('Error: ' + err));
+}
+
+function openEditGradeModal(id, subject, marks, semester) {
+    editingGradeId = id;
+    document.getElementById('editGradeSubject').value = subject;
+    document.getElementById('editGradeMarks').value = marks;
+    document.getElementById('editGradeSemester').value = semester;
+    document.getElementById('editGradeModal').style.display = 'block';
+}
+
+function closeEditGradeModal() {
+    document.getElementById('editGradeModal').style.display = 'none';
+    editingGradeId = null;
+}
+
+function saveGrade() {
+    const marks = document.getElementById('editGradeMarks').value;
+
+    if (!marks) {
+        alert('Please enter marks');
+        return;
+    }
+
+    fetch(`/api/grades/${editingGradeId}`, {
         method: 'PUT',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (res.ok) {
-        showMessage(data.message || 'Updated', 'green');
-        document.getElementById('profile-name').textContent = payload.name;
-      } else {
-        showMessage(data.error || 'Update failed', 'red');
-      }
-    } catch (err) {
-      console.error(err);
-      showMessage('Error updating', 'red');
-    }
-  });
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            marks: parseFloat(marks)
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.message) {
+            alert('Grade updated successfully');
+            closeEditGradeModal();
+            loadGrades();
+        } else {
+            alert('Error: ' + (data.error || 'Failed to update'));
+        }
+    })
+    .catch(err => alert('Error: ' + err));
+}
 
-  document.getElementById('deleteBtn').addEventListener('click', async () => {
-    if (!confirm('Delete this student? This cannot be undone.')) return;
-    try {
-      const res = await fetch(`/api/students/${studentId}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (res.ok) {
-        alert(data.message || 'Deleted');
-        location.href = '/students';
-      } else {
-        showMessage(data.error || 'Delete failed', 'red');
-      }
-    } catch (err) {
-      console.error(err);
-      showMessage('Error deleting', 'red');
-    }
-  });
+function deleteGrade(id) {
+    if (!confirm('Are you sure you want to delete this grade record?')) return;
+    
+    fetch(`/api/grades/${id}`, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+            if (data.message) {
+                alert('Grade deleted successfully');
+                loadGrades();
+            } else {
+                alert('Error: ' + (data.error || 'Failed to delete'));
+            }
+        })
+        .catch(err => alert('Error: ' + err));
+}
 
-  // load on page open
-  loadStudent();
+// Set today's date as default
+if (document.getElementById('attendanceDate')) {
+    document.getElementById('attendanceDate').valueAsDate = new Date();
+}
+
+// Close modals when clicking outside
+window.onclick = function(event) {
+    const attendanceModal = document.getElementById('editAttendanceModal');
+    const gradeModal = document.getElementById('editGradeModal');
+    
+    if (event.target === attendanceModal) {
+        closeEditAttendanceModal();
+    }
+    if (event.target === gradeModal) {
+        closeEditGradeModal();
+    }
+}
+
+// Load student data on page load
+console.log("Loading student profile...");
+loadStudent();
 </script>
+
 </body>
 </html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile | Student Management</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body { background: #f4f6fb; margin: 0; }
+        main { padding: 35px 45px; }
+
+        .navbar {
+            background: linear-gradient(135deg, #31034e, #4a1174);
+            padding: 14px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .navbar-left i { font-size: 26px; }
+
+        .nav-links {
+            display: flex;
+            gap: 22px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .user-box {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: white;
+        }
+
+        .role-badge {
+            background: #ffb84a;
+            color: #000;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: #ff4a60;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .profile-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .profile-header h1 {
+            color: #31034e;
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .back-btn {
+            background: #31034e;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .back-btn:hover {
+            opacity: 0.85;
+        }
+
+        .profile-field {
+            margin-bottom: 25px;
+        }
+
+        .profile-field label {
+            display: block;
+            font-weight: 600;
+            color: #31034e;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .profile-field-value {
+            background: #f9f9f9;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #333;
+            border-left: 4px solid #31034e;
+        }
+
+        .profile-field-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: 0.2s;
+        }
+
+        .profile-field-input:focus {
+            outline: none;
+            border-color: #31034e;
+            box-shadow: 0 0 8px rgba(49, 3, 78, 0.1);
+        }
+
+        .branch-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .branch-cse { background: #6366f1; }
+        .branch-ece { background: #ec4899; }
+        .branch-me { background: #f59e0b; }
+        .branch-ce { background: #10b981; }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-edit {
+            background: #4a60ff;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-delete {
+            background: #ff4a60;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .profile-info {
+            background: linear-gradient(135deg, #f0f4ff, #f9f0ff);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .profile-info h3 {
+            color: #31034e;
+            margin: 0 0 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (max-width: 768px) {
+            main { padding: 20px; }
+            .profile-container { padding: 20px; }
+            .action-buttons { flex-direction: column; }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="navbar-left">
+        <i class="fa-solid fa-graduation-cap"></i>
+        Student Management
+    </div>
+
+    <ul class="nav-links">
+        <li><a href="/"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+        <li><a href="/students"><i class="fa-solid fa-users"></i> Students</a></li>
+    </ul>
+
+    <div class="user-box">
+        <span><i class="fa-solid fa-user-circle"></i> {{ username }}</span>
+        <span class="role-badge">{{ session.get('role')|upper }}</span>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+</nav>
+
+<main>
+    <div class="profile-container">
+        <div class="profile-header">
+            <h1 id="studentName">Loading...</h1>
+            <a href="/students" class="back-btn">
+                <i class="fa-solid fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+
+        <div id="alert" class="alert"></div>
+
+        <div class="profile-info">
+            <h3><i class="fa-solid fa-info-circle"></i> Student Information</h3>
+        </div>
+
+        <div class="profile-field">
+            <label><i class="fa-solid fa-user"></i> Name</label>
+            <div class="profile-field-value" id="fieldName">Loading...</div>
+        </div>
+
+        <div class="profile-field">
+            <label><i class="fa-solid fa-id-card"></i> Roll Number</label>
+            <div class="profile-field-value" id="fieldRoll">Loading...</div>
+        </div>
+
+        <div class="profile-field">
+            <label><i class="fa-solid fa-building"></i> Branch</label>
+            <div class="profile-field-value" id="fieldBranch">Loading...</div>
+        </div>
+
+        <div class="profile-field">
+            <label><i class="fa-solid fa-calendar"></i> Year</label>
+            <div class="profile-field-value" id="fieldYear">Loading...</div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="/students" class="btn" style="background: #e0e0e0; color: #333;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Students
+            </a>
+        </div>
+    </div>
+</main>
+
+<script>
+const studentId = window.location.pathname.split('/')[2];
+
+function showAlert(message, type) {
+    const alert = document.getElementById('alert');
+    alert.textContent = message;
+    alert.className = `alert alert-${type}`;
+    alert.style.display = 'block';
+}
+
+function getBranchClass(branch) {
+    const branchMap = {
+        'CSE': 'branch-cse',
+        'ECE': 'branch-ece',
+        'ME': 'branch-me',
+        'CE': 'branch-ce'
+    };
+    return branchMap[branch] || 'branch-cse';
+}
+
+function loadStudent() {
+    fetch(`/api/students/${studentId}`)
+        .then(res => {
+            if (!res.ok) throw new Error('Student not found');
+            return res.json();
+        })
+        .then(data => {
+            document.getElementById('studentName').textContent = data.name;
+            document.getElementById('fieldName').textContent = data.name;
+            document.getElementById('fieldRoll').textContent = data.roll;
+            document.getElementById('fieldBranch').innerHTML = `<span class="branch-badge ${getBranchClass(data.branch)}">${data.branch}</span>`;
+            document.getElementById('fieldYear').textContent = data.year;
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            showAlert('Failed to load student information', 'error');
+            document.getElementById('studentName').textContent = 'Student Not Found';
+        });
+}
+
+loadStudent();
+</script>
+
+</body>
+</html>

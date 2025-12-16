@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance | Student Management</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body { background: #f4f6fb; margin: 0; }
+        main { padding: 35px 45px; }
+
+        .navbar {
+            background: linear-gradient(135deg, #1a0033, #2d004d);
+            padding: 14px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .navbar-left { display: flex; align-items: center; gap: 12px; color: white; font-size: 20px; font-weight: 600; }
+        .nav-links { display: flex; gap: 22px; list-style: none; }
+        .nav-links a { color: white; text-decoration: none; font-size: 15px; padding: 8px 14px; border-radius: 6px; transition: 0.2s; }
+        .nav-links a:hover { background: rgba(255,165,0,0.2); }
+
+        .user-box { display: flex; align-items: center; gap: 14px; color: white; }
+        .role-badge { background: #ff6b6b; color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+        .logout-btn { background: #ff6b6b; color: white; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 14px; }
+
+        .page-header { margin-bottom: 30px; }
+        .page-header h1 { color: #1a0033; font-size: 28px; margin: 0; }
+
+        .controls { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        .date-input { padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; }
+        .btn-load { background: #1a0033; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; }
+        thead { background: linear-gradient(135deg, #1a0033, #2d004d); color: white; }
+        thead th { padding: 16px; text-align: left; font-weight: 600; }
+        tbody td { padding: 14px 16px; border-bottom: 1px solid #eee; }
+        tbody tr:hover { background: #f9f9f9; }
+
+        .status-present { background: #d4edda; color: #155724; padding: 6px 12px; border-radius: 20px; font-weight: 600; }
+        .status-absent { background: #f8d7da; color: #721c24; padding: 6px 12px; border-radius: 20px; font-weight: 600; }
+
+        .status-select { padding: 8px 12px; border: 2px solid #ddd; border-radius: 6px; cursor: pointer; }
+        .save-btn { background: #10b981; color: white; padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar">
+    <div class="navbar-left">
+        <i class="fa-solid fa-shield"></i> Admin Panel
+    </div>
+    <ul class="nav-links">
+        <li><a href="/admin/dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+        <li><a href="/students"><i class="fa-solid fa-users"></i> Students</a></li>
+        <li><a href="/admin/attendance"><i class="fa-solid fa-clipboard"></i> Attendance</a></li>
+        <li><a href="/admin/grades"><i class="fa-solid fa-grades"></i> Grades</a></li>
+    </ul>
+    <div class="user-box">
+        <span><i class="fa-solid fa-user-shield"></i> {{ username }}</span>
+        <span class="role-badge">{{ session.get('role')|upper }}</span>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+</nav>
+
+<main>
+    <div class="page-header">
+        <h1><i class="fa-solid fa-clipboard"></i> Attendance Management</h1>
+    </div>
+
+    <div class="controls">
+        <label>Select Date:</label>
+        <input type="date" id="attendanceDate" class="date-input">
+        <button class="btn-load" onclick="loadAttendance()">Load</button>
+    </div>
+
+    <table id="attendanceTable">
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Roll Number</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="attendanceList">
+            <tr><td colspan="4" style="text-align: center; padding: 30px;">Select a date to load attendance</td></tr>
+        </tbody>
+    </table>
+</main>
+
+<script>
+document.getElementById('attendanceDate').valueAsDate = new Date();
+
+function loadAttendance() {
+    const date = document.getElementById('attendanceDate').value;
+    
+    fetch(`/api/students`)
+        .then(res => res.json())
+        .then(students => {
+            const tbody = document.getElementById('attendanceList');
+            tbody.innerHTML = students.map(s => `
+                <tr>
+                    <td><strong>${s.name}</strong></td>
+                    <td>${s.roll}</td>
+                    <td>
+                        <select class="status-select" id="status-${s.id}">
+                            <option value="">Not Marked</option>
+                            <option value="Present">Present</option>
+                            <option value="Absent">Absent</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="save-btn" onclick="markAttendance(${s.id}, '${date}')">
+                            <i class="fa-solid fa-check"></i> Save
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        });
+}
+
+function markAttendance(studentId, date) {
+    const status = document.getElementById(`status-${studentId}`).value;
+    
+    if (!status) {
+        alert('Please select a status');
+        return;
+    }
+    
+    fetch('/api/attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            student_id: studentId,
+            date: date,
+            status: status
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.message) {
+            alert('Attendance marked successfully');
+        } else {
+            alert('Error: ' + data.error);
+        }
+    });
+}
+</script>
+
+</body>
+</html>

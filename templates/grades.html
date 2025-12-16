@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grades | Student Management</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body { background: #f4f6fb; margin: 0; }
+        main { padding: 35px 45px; }
+
+        .navbar {
+            background: linear-gradient(135deg, #1a0033, #2d004d);
+            padding: 14px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .navbar-left { display: flex; align-items: center; gap: 12px; color: white; font-size: 20px; font-weight: 600; }
+        .nav-links { display: flex; gap: 22px; list-style: none; }
+        .nav-links a { color: white; text-decoration: none; font-size: 15px; padding: 8px 14px; border-radius: 6px; }
+        .nav-links a:hover { background: rgba(255,165,0,0.2); }
+
+        .user-box { display: flex; align-items: center; gap: 14px; color: white; }
+        .role-badge { background: #ff6b6b; color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+
+        .page-header { margin-bottom: 30px; }
+        .page-header h1 { color: #1a0033; font-size: 28px; margin: 0; }
+
+        .container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        
+        .form-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .form-card h2 { color: #1a0033; margin-top: 0; }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; color: #333; }
+        input, select { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+        input:focus, select:focus { outline: none; border-color: #1a0033; }
+
+        .btn { background: #1a0033; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; }
+        .btn:hover { opacity: 0.9; }
+
+        .grades-list { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .grades-list h2 { color: #1a0033; margin-top: 0; }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: #f0f0f0; }
+        thead th { padding: 12px; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; }
+        tbody td { padding: 12px; border-bottom: 1px solid #eee; }
+
+        .grade-badge { display: inline-block; padding: 6px 12px; border-radius: 6px; font-weight: 600; color: white; }
+        .grade-a { background: #10b981; }
+        .grade-b { background: #f59e0b; }
+        .grade-c { background: #ef4444; }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar">
+    <div class="navbar-left">
+        <i class="fa-solid fa-shield"></i> Admin Panel
+    </div>
+    <ul class="nav-links">
+        <li><a href="/admin/dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+        <li><a href="/admin/attendance"><i class="fa-solid fa-clipboard"></i> Attendance</a></li>
+        <li><a href="/admin/grades"><i class="fa-solid fa-grades"></i> Grades</a></li>
+    </ul>
+    <div class="user-box">
+        <span><i class="fa-solid fa-user-shield"></i> {{ username }}</span>
+        <span class="role-badge">{{ session.get('role')|upper }}</span>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+</nav>
+
+<main>
+    <div class="page-header">
+        <h1><i class="fa-solid fa-grades"></i> Grade Management</h1>
+    </div>
+
+    <div class="container">
+        <div class="form-card">
+            <h2>Add New Grade</h2>
+            <form id="gradeForm">
+                <div class="form-group">
+                    <label>Select Student</label>
+                    <select id="studentId" required>
+                        <option value="">Loading...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" id="subject" placeholder="e.g., Mathematics" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Marks (Out of 100)</label>
+                    <input type="number" id="marks" min="0" max="100" placeholder="Enter marks" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Semester</label>
+                    <select id="semester" required>
+                        <option value="">Select Semester</option>
+                        <option value="1">Semester 1</option>
+                        <option value="2">Semester 2</option>
+                        <option value="3">Semester 3</option>
+                        <option value="4">Semester 4</option>
+                        <option value="5">Semester 5</option>
+                        <option value="6">Semester 6</option>
+                        <option value="7">Semester 7</option>
+                        <option value="8">Semester 8</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn">
+                    <i class="fa-solid fa-plus"></i> Add Grade
+                </button>
+            </form>
+        </div>
+
+        <div class="grades-list">
+            <h2>Recent Grades</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Subject</th>
+                        <th>Marks</th>
+                        <th>Grade</th>
+                        <th>Semester</th>
+                    </tr>
+                </thead>
+                <tbody id="gradesList">
+                    <tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script>
+// Load students
+fetch('/api/students')
+    .then(res => res.json())
+    .then(data => {
+        const select = document.getElementById('studentId');
+        select.innerHTML = '<option value="">Select Student</option>' + 
+            data.map(s => `<option value="${s.id}">${s.name} (${s.roll})</option>`).join('');
+    });
+
+// Load grades
+function loadGrades() {
+    fetch('/api/grades')
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('gradesList').innerHTML = data.slice(-10).map(g => `
+                <tr>
+                    <td>${g.name}</td>
+                    <td>${g.subject}</td>
+                    <td>${g.marks}</td>
+                    <td><span class="grade-badge grade-${g.grade.toLowerCase()}">${g.grade}</span></td>
+                    <td>${g.semester}</td>
+                </tr>
+            `).join('');
+        });
+}
+
+loadGrades();
+
+// Add grade
+document.getElementById('gradeForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const marks = parseInt(document.getElementById('marks').value);
+    if (marks < 0 || marks > 100) {
+        alert('Marks must be between 0 and 100');
+        return;
+    }
+    
+    const response = await fetch('/api/grades', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            student_id: document.getElementById('studentId').value,
+            subject: document.getElementById('subject').value,
+            marks: marks,
+            semester: document.getElementById('semester').value
+        })
+    });
+    
+    const data = await response.json();
+    
+    if (data.message) {
+        alert('Grade added successfully! Grade: ' + data.grade);
+        document.getElementById('gradeForm').reset();
+        loadGrades();
+    } else {
+        alert('Error: ' + data.error);
+    }
+});
+</script>
+
+</body>
+</html>

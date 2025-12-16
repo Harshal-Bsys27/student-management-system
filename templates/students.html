@@ -9,162 +9,321 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
-        * { box-sizing: border-box; }
+        body { background: #f4f6fb; margin: 0; }
+        main { padding: 35px 45px; }
 
-        body {
-            margin: 0;
-            font-family: "Segoe UI", sans-serif;
-            background: #f4f5f8;
-        }
-
-        /* NAVBAR */
         .navbar {
-            background: linear-gradient(135deg, #2b0147, #4a1174);
-            padding: 14px 40px;
+            background: linear-gradient(135deg, #31034e, #4a1174);
+            padding: 14px 30px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
         }
 
-        .navbar h3 {
-            margin: 0;
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            font-size: 20px;
             font-weight: 600;
         }
 
+        .navbar-left i { font-size: 26px; }
+
         .nav-links {
-            list-style: none;
             display: flex;
             gap: 22px;
-            margin: 0;
-            padding: 0;
+            list-style: none;
         }
 
         .nav-links a {
             color: white;
             text-decoration: none;
-            font-weight: 500;
+            font-size: 15px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: 0.2s;
         }
 
         .nav-links a:hover {
-            text-decoration: underline;
+            background: rgba(255,255,255,0.15);
         }
 
-        /* PAGE */
-        .container {
-            padding: 35px 40px;
-        }
-
-        h2 {
-            margin-bottom: 20px;
-            color: #31034e;
-        }
-
-        /* CONTROLS */
-        .controls {
+        .user-box {
             display: flex;
-            gap: 18px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
+            align-items: center;
+            gap: 14px;
+            color: white;
         }
 
-        .controls input,
-        .controls select {
-            padding: 10px;
+        .role-badge {
+            background: #ffb84a;
+            color: #000;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: #ff4a60;
+            color: white;
+            padding: 8px 14px;
             border-radius: 6px;
-            border: 1px solid #ccc;
-            min-width: 200px;
+            text-decoration: none;
             font-size: 14px;
+            transition: 0.2s;
         }
 
-        /* TABLE */
+        .logout-btn:hover {
+            opacity: 0.85;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            color: #31034e;
+            font-size: 28px;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .search-box {
+            padding: 10px 15px;
+            border: 2px solid #31034e;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 250px;
+            transition: 0.2s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #4a1174;
+            box-shadow: 0 0 8px rgba(49, 3, 78, 0.2);
+        }
+
+        .add-btn {
+            background: #31034e;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .add-btn:hover {
+            opacity: 0.85;
+            transform: translateY(-2px);
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
             background: white;
-            border-radius: 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             overflow: hidden;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
         }
 
-        th {
-            background: #31034e;
+        thead {
+            background: linear-gradient(135deg, #31034e, #4a1174);
             color: white;
-            padding: 14px;
-            cursor: pointer;
+        }
+
+        thead th {
+            padding: 16px;
             text-align: left;
-            font-size: 14px;
-        }
-
-        td {
-            padding: 14px;
-            border-bottom: 1px solid #eee;
-            font-size: 14px;
-        }
-
-        tr:hover {
-            background: #f7f2fb;
-        }
-
-        /* NAME LINK */
-        .name-link {
-            color: #4a1174;
             font-weight: 600;
-            text-decoration: none;
+            font-size: 14px;
         }
 
-        .name-link:hover {
-            text-decoration: underline;
+        tbody td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
         }
 
-        /* BUTTONS */
-        .btn {
-            padding: 6px 10px;
-            border-radius: 6px;
-            border: none;
+        tbody tr:hover {
+            background: #f9f9f9;
+            transition: 0.2s;
+        }
+
+        .student-name {
+            color: #31034e;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 13px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .student-name:hover {
+            color: #4a1174;
+        }
+
+        .roll-badge {
+            background: #f0f0f0;
+            color: #31034e;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .branch-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
             color: white;
+        }
+
+        .branch-cse { background: #6366f1; }
+        .branch-ece { background: #ec4899; }
+        .branch-me { background: #f59e0b; }
+        .branch-ce { background: #10b981; }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .btn-edit {
-            background: #f0ad4e;
+            background: #4a60ff;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
         }
 
         .btn-delete {
-            background: #d9534f;
-        }
-
-        /* TOAST */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            padding: 14px 18px;
-            background: #333;
+            background: #ff4a60;
             color: white;
-            border-radius: 8px;
-            opacity: 0;
-            pointer-events: none;
-            transition: 0.3s;
-            font-size: 14px;
         }
 
-        .toast.show {
-            opacity: 1;
+        .btn-delete:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
         }
 
-        .toast.success {
-            background: #1db954;
+        .delete-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
         }
 
-        .toast.error {
-            background: #e74c3c;
+        .modal-box {
+            background: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        .modal-box h2 {
+            color: #31034e;
+            margin-bottom: 15px;
+        }
+
+        .modal-box p {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .confirm-delete {
+            background: #ff4a60;
+            color: white;
+        }
+
+        .confirm-delete:hover {
+            opacity: 0.9;
+        }
+
+        .cancel-delete {
+            background: #ddd;
+            color: #333;
+        }
+
+        .cancel-delete:hover {
+            background: #ccc;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #ddd;
         }
 
         @media (max-width: 768px) {
-            .container { padding: 25px; }
-            .controls { flex-direction: column; }
+            main { padding: 20px; }
+            .search-box { width: 100%; }
+            table { font-size: 12px; }
+            thead th, tbody td { padding: 10px; }
         }
     </style>
 </head>
@@ -173,134 +332,257 @@
 
 <!-- NAVBAR -->
 <nav class="navbar">
-    <h3><i class="fa-solid fa-graduation-cap"></i> Student Management</h3>
-    <ul class="nav-links">
-        <li><a href="/">Dashboard</a></li>
-        <li><a href="/students">Students</a></li>
-        <li><a href="/add_student">Add Student</a></li>
-        <li><a href="/logout">Logout</a></li>
-    </ul>
-</nav>
-
-<!-- PAGE -->
-<div class="container">
-    <h2>Students List</h2>
-
-    <!-- CONTROLS -->
-    <div class="controls">
-        <input type="text" id="searchBox" placeholder="Search student...">
-        <select id="branchFilter"><option value="">Filter by Branch</option></select>
-        <select id="yearFilter"><option value="">Filter by Year</option></select>
+    <div class="navbar-left">
+        <i class="fa-solid fa-graduation-cap"></i>
+        Student Management
     </div>
 
-    <!-- TABLE -->
-    <table id="students-table">
+    <ul class="nav-links">
+        <li><a href="/"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+        <li><a href="/students"><i class="fa-solid fa-users"></i> Students</a></li>
+        {% if session.get('role') == 'admin' %}
+        <li><a href="/add_student"><i class="fa-solid fa-user-plus"></i> Add Student</a></li>
+        {% endif %}
+    </ul>
+
+    <div class="user-box">
+        <span><i class="fa-solid fa-user-circle"></i> {{ username }}</span>
+        <span class="role-badge">{{ session.get('role')|upper }}</span>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+</nav>
+
+<main>
+    <div class="page-header">
+        <h1><i class="fa-solid fa-users"></i> Student List</h1>
+        <div class="header-actions">
+            <input type="text" id="searchBox" class="search-box" placeholder="Search by name, roll, or branch...">
+            {% if session.get('role') == 'admin' %}
+            <a href="/add_student" class="add-btn">
+                <i class="fa-solid fa-plus"></i> Add Student
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <table>
         <thead>
             <tr>
-                <th>ID</th>
-                <th onclick="sortTable('name')">Name ⬍</th>
-                <th onclick="sortTable('roll')">Roll ⬍</th>
-                <th onclick="sortTable('branch')">Branch ⬍</th>
-                <th onclick="sortTable('year')">Year ⬍</th>
-                <th>Actions</th>
+                <th><i class="fa-solid fa-user"></i> Name</th>
+                <th><i class="fa-solid fa-id-card"></i> Roll Number</th>
+                <th><i class="fa-solid fa-building"></i> Branch</th>
+                <th><i class="fa-solid fa-calendar"></i> Year</th>
+                {% if session.get('role') == 'admin' %}
+                <th><i class="fa-solid fa-gears"></i> Actions</th>
+                {% endif %}
             </tr>
         </thead>
-        <tbody></tbody>
+        <tbody id="studentsList">
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 40px;">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Loading students...
+                </td>
+            </tr>
+        </tbody>
     </table>
-</div>
 
-<!-- TOAST -->
-<div id="toast" class="toast"></div>
+    <div id="emptyState" class="empty-state" style="display: none;">
+        <i class="fa-solid fa-inbox"></i>
+        <h3>No Students Found</h3>
+        <p>Add your first student to get started</p>
+    </div>
+</main>
+
+<!-- DELETE MODAL -->
+<div id="deleteModal" class="delete-modal">
+    <div class="modal-box">
+        <h2><i class="fa-solid fa-exclamation-triangle"></i> Delete Student?</h2>
+        <p id="deleteMessage">Are you sure you want to delete this student? This action cannot be undone.</p>
+        <div class="modal-buttons">
+            <button class="confirm-delete" onclick="confirmDelete()">Delete</button>
+            <button class="cancel-delete" onclick="closeDeleteModal()">Cancel</button>
+        </div>
+    </div>
+</div>
 
 <script>
 let allStudents = [];
-let sortOrder = { name: 1, roll: 1, branch: 1, year: 1 };
+let studentToDelete = null;
 
-function showToast(message, type="success") {
-    const toast = document.getElementById("toast");
-    toast.innerText = message;
-    toast.className = `toast show ${type}`;
-    setTimeout(() => toast.classList.remove("show"), 2500);
+function getBranchClass(branch) {
+    const map = {
+        'CSE': 'branch-cse',
+        'ECE': 'branch-ece',
+        'ME': 'branch-me',
+        'CE': 'branch-ce'
+    };
+    return map[branch] || 'branch-cse';
 }
 
-async function fetchStudents() {
-    const res = await fetch('/api/students');
-    allStudents = await res.json();
-    populateFilters();
-    renderTable(allStudents);
+function getInitials(name) {
+    return name
+        .split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase()
+        .substring(0, 2);
 }
 
-function renderTable(data) {
-    const tbody = document.querySelector('#students-table tbody');
-    tbody.innerHTML = "";
-    data.forEach(s => {
-        tbody.innerHTML += `
+function getColorForInitials(name) {
+    const colors = [
+        'linear-gradient(135deg, #667eea, #764ba2)',
+        'linear-gradient(135deg, #f093fb, #f5576c)',
+        'linear-gradient(135deg, #4facfe, #00f2fe)',
+        'linear-gradient(135deg, #43e97b, #38f9d7)',
+        'linear-gradient(135deg, #fa709a, #fee140)',
+        'linear-gradient(135deg, #30cfd0, #330867)',
+        'linear-gradient(135deg, #a8edea, #fed6e3)',
+        'linear-gradient(135deg, #ff9466, #ff6a88)',
+    ];
+    
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+}
+
+function renderStudents(students) {
+    const list = document.getElementById('studentsList');
+    const emptyState = document.getElementById('emptyState');
+
+    if (students.length === 0) {
+        list.innerHTML = '';
+        emptyState.style.display = 'block';
+        return;
+    }
+
+    emptyState.style.display = 'none';
+    const isAdmin = '{{ session.get("role") }}' === 'admin';
+    
+    list.innerHTML = students.map(s => {
+        const initials = getInitials(s.name);
+        const color = getColorForInitials(s.name);
+        
+        let avatarHtml;
+        if (s.profile_picture) {
+            avatarHtml = `
+                <img src="/static/uploads/profiles/${s.profile_picture}" 
+                     alt="${s.name}" 
+                     style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover; cursor: pointer;"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div style="width: 35px; height: 35px; border-radius: 50%; background: ${color}; display: none; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600;">${initials}</div>
+            `;
+        } else {
+            avatarHtml = `<div style="width: 35px; height: 35px; border-radius: 50%; background: ${color}; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600;">${initials}</div>`;
+        }
+        
+        return `
             <tr>
-                <td>${s.id}</td>
-                <td><a class="name-link" href="/student/${s.id}">${s.name}</a></td>
-                <td>${s.roll}</td>
-                <td>${s.branch}</td>
-                <td>${s.year}</td>
                 <td>
-                    <button class="btn btn-edit" onclick="editStudent(${s.id})">
-                        <i class="fa-solid fa-pen"></i>
-                    </button>
-                    <button class="btn btn-delete" onclick="deleteStudent(${s.id})">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        ${avatarHtml}
+                        <a href="/student/${s.id}" class="student-name">
+                            <i class="fa-solid fa-user-circle" style="color: #31034e;"></i>
+                            ${s.name}
+                        </a>
+                    </div>
                 </td>
+                <td><span class="roll-badge">${s.roll}</span></td>
+                <td><span class="branch-badge ${getBranchClass(s.branch)}">${s.branch}</span></td>
+                <td>${s.year}</td>
+                ${isAdmin ? `
+                <td>
+                    <div class="action-buttons">
+                        <a href="/edit_student/${s.id}" class="btn-edit">
+                            <i class="fa-solid fa-pen"></i> Edit
+                        </a>
+                        <button class="btn-delete" onclick="openDeleteModal(${s.id}, '${s.name}')">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </td>
+                ` : ''}
             </tr>
         `;
+    }).join('');
+}
+
+function filterStudents() {
+    const query = document.getElementById('searchBox').value.toLowerCase();
+    const filtered = allStudents.filter(s =>
+        s.name.toLowerCase().includes(query) ||
+        s.roll.toLowerCase().includes(query) ||
+        s.branch.toLowerCase().includes(query)
+    );
+    renderStudents(filtered);
+}
+
+function openDeleteModal(studentId, studentName) {
+    studentToDelete = studentId;
+    document.getElementById('deleteMessage').textContent = 
+        `Are you sure you want to delete "${studentName}"? This action cannot be undone.`;
+    document.getElementById('deleteModal').style.display = 'block';
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+    studentToDelete = null;
+}
+
+function confirmDelete() {
+    if (!studentToDelete) return;
+
+    fetch(`/api/students/${studentToDelete}`, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+            if (data.message) {
+                allStudents = allStudents.filter(s => s.id !== studentToDelete);
+                renderStudents(allStudents);
+                alert('Student deleted successfully');
+            } else {
+                alert('Error: ' + (data.error || 'Failed to delete'));
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            alert('Error deleting student: ' + err);
+        });
+    
+    closeDeleteModal();
+}
+
+// Load students
+console.log("Loading students...");
+fetch('/api/students')
+    .then(res => {
+        console.log("Response status:", res.status);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+    })
+    .then(data => {
+        console.log("Students loaded:", data.length);
+        allStudents = data;
+        renderStudents(allStudents);
+    })
+    .catch(err => {
+        console.error('Error loading students:', err);
+        document.getElementById('studentsList').innerHTML = 
+            `<tr><td colspan="5" style="text-align: center; color: red; padding: 40px;">
+                <i class="fa-solid fa-exclamation-circle"></i> Error loading students. Please refresh the page.
+            </td></tr>`;
     });
+
+// Search functionality
+document.getElementById('searchBox').addEventListener('keyup', filterStudents);
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('deleteModal');
+    if (event.target === modal) {
+        closeDeleteModal();
+    }
 }
-
-document.getElementById("searchBox").addEventListener("input", function () {
-    const v = this.value.toLowerCase();
-    renderTable(allStudents.filter(s =>
-        s.name.toLowerCase().includes(v) ||
-        s.roll.toLowerCase().includes(v) ||
-        s.branch.toLowerCase().includes(v) ||
-        s.year.toLowerCase().includes(v)
-    ));
-});
-
-function populateFilters() {
-    const b = new Set(allStudents.map(s => s.branch));
-    const y = new Set(allStudents.map(s => s.year));
-
-    branchFilter.innerHTML = `<option value="">Filter by Branch</option>`;
-    yearFilter.innerHTML = `<option value="">Filter by Year</option>`;
-
-    b.forEach(v => branchFilter.innerHTML += `<option>${v}</option>`);
-    y.forEach(v => yearFilter.innerHTML += `<option>${v}</option>`);
-}
-
-branchFilter.onchange = yearFilter.onchange = () => {
-    let f = allStudents;
-    if (branchFilter.value) f = f.filter(s => s.branch === branchFilter.value);
-    if (yearFilter.value) f = f.filter(s => s.year === yearFilter.value);
-    renderTable(f);
-};
-
-function sortTable(field) {
-    sortOrder[field] *= -1;
-    allStudents.sort((a,b)=> a[field] > b[field] ? sortOrder[field] : -sortOrder[field]);
-    renderTable(allStudents);
-}
-
-function editStudent(id) {
-    showToast("Edit feature coming soon", "error");
-}
-
-async function deleteStudent(id) {
-    if (!confirm("Delete this student?")) return;
-    const res = await fetch(`/api/students/${id}`, { method: "DELETE" });
-    const data = await res.json();
-    showToast(data.message || "Deleted");
-    fetchStudents();
-}
-
-fetchStudents();
 </script>
 
 </body>

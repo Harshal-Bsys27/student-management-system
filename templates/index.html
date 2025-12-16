@@ -117,7 +117,13 @@
 
         .card h3 {
             color: #31034e;
-            margin-bottom: 8px;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         /* QUICK ACTIONS */
@@ -177,19 +183,32 @@
             background: white;
             padding: 18px;
             border-radius: 14px;
-            height: 280px;
+            height: auto;
+            min-height: 350px;
             box-shadow: 0 5px 18px rgba(0,0,0,0.15);
             cursor: pointer;
             transition: 0.2s;
+            position: relative;
         }
 
-        .chart-card:hover {
-            transform: scale(1.02);
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            margin-top: 10px;
         }
 
         canvas {
-            width: 100% !important;
-            height: 100% !important;
+            max-width: 100%;
+            max-height: 100%;
+        }
+        
+        #branchChart {
+            max-height: 280px;
+        }
+        
+        #yearChart {
+            max-height: 280px;
         }
 
         /* MODAL */
@@ -265,43 +284,47 @@
     <!-- CARDS -->
     <div class="cards">
         <div class="card">
-            <h3>Total Students</h3>
-            <p id="total-students">Loading...</p>
+            <h3><i class="fa-solid fa-book"></i> Total Students</h3>
+            <p id="total-students" style="font-size: 28px; color: #4a1174;">Loading...</p>
         </div>
         <div class="card">
-            <h3>Total Branches</h3>
-            <p id="total-branches">Loading...</p>
+            <h3><i class="fa-solid fa-building"></i> Total Branches</h3>
+            <p id="total-branches" style="font-size: 28px; color: #4a1174;">Loading...</p>
         </div>
         <div class="card">
-            <h3>Students This Year</h3>
-            <p id="students-year">Loading...</p>
+            <h3><i class="fa-solid fa-calendar"></i> This Year</h3>
+            <p id="students-year" style="font-size: 28px; color: #4a1174;">Loading...</p>
         </div>
     </div>
 
     <!-- QUICK ACTIONS -->
     <div class="quick-links">
-        <h2>Quick Actions</h2>
-        <a href="/add_student">➕ Add Student</a>
-        <a href="/students">📄 View Students</a>
+        <h2><i class="fa-solid fa-bolt"></i> Quick Actions</h2>
+        <a href="/add_student"><i class="fa-solid fa-user-plus"></i> Add Student</a>
+        <a href="/students"><i class="fa-solid fa-list"></i> View Students</a>
     </div>
 
     <!-- BOTTOM -->
     <div class="dashboard-bottom">
-
         <div class="recent-box">
-            <h3>Recently Added Students</h3>
+            <h3><i class="fa-solid fa-star"></i> Recently Added</h3>
             <div id="recent-list">Loading...</div>
         </div>
 
         <div class="charts-container">
             <div class="chart-card" id="branchCard">
-                <canvas id="branchChart"></canvas>
+                <h3><i class="fa-solid fa-chart-column" style="color: #06b6d4;"></i> Students by Branch</h3>
+                <div class="chart-wrapper">
+                    <canvas id="branchChart"></canvas>
+                </div>
             </div>
             <div class="chart-card" id="yearCard">
-                <canvas id="yearChart"></canvas>
+                <h3><i class="fa-solid fa-chart-pie" style="color: #10b981;"></i> Students by Year</h3>
+                <div class="chart-wrapper">
+                    <canvas id="yearChart"></canvas>
+                </div>
             </div>
         </div>
-
     </div>
 </main>
 
@@ -314,49 +337,120 @@
 </div>
 
 <script>
-let branchChartObj, yearChartObj, modalChart;
+let branchChartObj, yearChartObj;
+
+console.log("Dashboard script started");
 
 fetch('/api/students')
-.then(res => res.json())
-.then(data => {
-    document.getElementById('total-students').innerText = data.length;
-    document.getElementById('total-branches').innerText = new Set(data.map(s => s.branch)).size;
-    const currentYear = new Date().getFullYear().toString();
-    document.getElementById('students-year').innerText = data.filter(s => s.year === currentYear).length;
+    .then(res => {
+        console.log("Students fetch - status:", res.status);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+    })
+    .then(data => {
+        console.log("Students data received:", data.length, "students");
+        document.getElementById('total-students').innerText = data.length;
+        document.getElementById('total-branches').innerText = new Set(data.map(s => s.branch)).size;
+        const currentYear = new Date().getFullYear().toString();
+        document.getElementById('students-year').innerText = data.filter(s => s.year === currentYear).length;
 
-    document.getElementById('recent-list').innerHTML = data.slice(-5).reverse().map(s => `
-        <div class="recent-item">
-            <b>${s.name}</b> (${s.roll}) — ${s.branch}, ${s.year}
-        </div>
-    `).join('');
+        document.getElementById('recent-list').innerHTML = data.slice(-5).reverse().map(s => `
+            <div class="recent-item">
+                <i class="fa-solid fa-user" style="color: #4a1174; margin-right: 8px;"></i><b>${s.name}</b> (${s.roll}) — ${s.branch}, ${s.year}
+            </div>
+        `).join('');
 
-    fetch('/api/students/analytics')
-    .then(res => res.json())
+        return fetch('/api/students/analytics');
+    })
+    .then(res => {
+        console.log("Analytics fetch - status:", res.status);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+    })
     .then(stats => {
-        branchChartObj = new Chart(branchChart, {
+        console.log("Analytics data received:", stats);
+        
+        if (!stats.branches || !stats.years) {
+            console.warn("No analytics data available");
+            return;
+        }
+
+        // Branch Chart
+        const branchCanvas = document.getElementById('branchChart');
+        if (!branchCanvas) {
+            console.error("Branch chart canvas not found");
+            return;
+        }
+
+        branchChartObj = new Chart(branchCanvas, {
             type: 'bar',
-            data: { labels: Object.keys(stats.branches), datasets: [{ data: Object.values(stats.branches), backgroundColor: "#4a60ff" }] },
-            options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} }
+            data: {
+                labels: Object.keys(stats.branches),
+                datasets: [{
+                    label: 'Students',
+                    data: Object.values(stats.branches),
+                    backgroundColor: [
+                        '#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b'
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 2,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: true, labels: { font: { size: 12, weight: 600 } } }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        ticks: { color: '#667eea' },
+                        grid: { color: '#e0e7ff' }
+                    },
+                    x: { grid: { display: false } }
+                }
+            }
         });
 
-        yearChartObj = new Chart(yearChart, {
-            type: 'pie',
-            data: { labels: Object.keys(stats.years), datasets: [{ data: Object.values(stats.years), backgroundColor: ['#4a60ff','#ff4a60','#60ff4a','#ffb84a'] }] }
+        // Year Chart
+        const yearCanvas = document.getElementById('yearChart');
+        if (!yearCanvas) {
+            console.error("Year chart canvas not found");
+            return;
+        }
+
+        yearChartObj = new Chart(yearCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(stats.years),
+                datasets: [{
+                    data: Object.values(stats.years),
+                    backgroundColor: [
+                        '#ff6b6b', '#ffd93d', '#6bcf7f', '#4d96ff', '#a78bfa'
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: true, position: 'bottom', labels: { font: { size: 12, weight: 600 }, padding: 20 } }
+                }
+            }
         });
+
+        console.log("Charts initialized successfully");
+    })
+    .catch(err => {
+        console.error('Dashboard error:', err);
+        document.getElementById('total-students').innerText = '0';
+        document.getElementById('total-branches').innerText = '0';
+        document.getElementById('students-year').innerText = '0';
     });
-});
-
-const modal = document.getElementById("chartModal");
-document.querySelector(".close").onclick = () => modal.style.display = "none";
-
-document.getElementById("branchCard").onclick = () => openModal(branchChartObj);
-document.getElementById("yearCard").onclick = () => openModal(yearChartObj);
-
-function openModal(chart) {
-    modal.style.display = "block";
-    if (modalChart) modalChart.destroy();
-    modalChart = new Chart(document.getElementById("modalChart"), chart.config);
-}
 </script>
 
 </body>
