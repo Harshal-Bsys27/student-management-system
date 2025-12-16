@@ -3,7 +3,7 @@
 A full-stack web application for managing students, tracking attendance, and recording grades. Built as a demonstration of full-stack development skills combining **Python Flask backend** with **vanilla JavaScript frontend**.
 
 **Live Demo:** [Add your deployed link here]  
-**GitHub:** [github.com/yourusername/student-management-system](https://github.com/yourusername/student-management-system)  
+**GitHub:** [github.com/yourusername/student-management-system](https://github.com/Harshal-Bsys27/student-management-system)  
 **Portfolio:** [Add your portfolio website]
 
 ---
