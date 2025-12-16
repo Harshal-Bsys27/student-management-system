@@ -163,18 +163,14 @@ student-management-system/
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ---
 
 ## 📞 Contact
 
 For any inquiries or feedback, please reach out:
 
-- **Email**: [your-email@example.com](mailto:your-email@example.com)
-- **LinkedIn**: [Your LinkedIn Profile](https://www.linkedin.com/in/yourprofile)
+- **Email**: [your-email@example.com](mailto:harshalbarhate2028@gmail.com)
+- **LinkedIn**: [Your LinkedIn Profile](https://www.linkedin.com/in/harshalbarhate778945ag/)
 
 ---
 
