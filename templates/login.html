@@ -4,46 +4,76 @@
     <meta charset="UTF-8">
     <title>Login | Student Management</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            background: #f4f6f9;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #2b0147, #4a1174);
+            font-family: "Segoe UI", sans-serif;
         }
 
         .auth-container {
+            width: 100%;
             max-width: 420px;
-            margin: 90px auto;
-            padding: 35px;
             background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            padding: 40px 35px;
+            border-radius: 16px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 42px;
+            color: #31034e;
+            margin-bottom: 10px;
         }
 
         .title {
-            text-align: center;
-            font-size: 26px;
-            font-weight: 600;
+            font-size: 24px;
+            font-weight: 700;
             color: #31034e;
         }
 
         .subtitle {
-            text-align: center;
             font-size: 14px;
             color: #666;
-            margin-bottom: 25px;
+            margin-bottom: 28px;
         }
 
-        input {
+        .input-group {
+            position: relative;
+            margin-bottom: 16px;
             width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
+        }
+
+        .input-group i {
+            position: absolute;
+            top: 50%;
+            left: 14px;
+            transform: translateY(-50%);
+            color: #888;
             font-size: 14px;
         }
 
-        input:focus {
+        .input-group input {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
             outline: none;
+        }
+
+        .input-group input:focus {
             border-color: #31034e;
         }
 
@@ -53,40 +83,60 @@
             background: #31034e;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 15px;
-            margin-top: 5px;
+            margin-top: 10px;
+            transition: 0.2s;
         }
 
         button:hover {
             opacity: 0.92;
         }
 
+        .error {
+            color: #ff4a60;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
         .link {
-            text-align: center;
             margin-top: 18px;
             font-size: 14px;
         }
 
-        .error {
-            color: red;
-            text-align: center;
-            margin-bottom: 12px;
-            font-size: 14px;
+        .link a {
+            color: #31034e;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .link a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
 
 <div class="auth-container">
+    <div class="icon">
+        <i class="fa-solid fa-user-graduate"></i>
+    </div>
+
     <div class="title">Student Management System</div>
-    <div class="subtitle">Login to access your dashboard</div>
+    <div class="subtitle">Login to continue to your dashboard</div>
 
     <div id="error" class="error"></div>
 
-    <input type="text" id="username" placeholder="Username" required>
-    <input type="password" id="password" placeholder="Password" required>
+    <div class="input-group">
+        <i class="fa-solid fa-user"></i>
+        <input type="text" id="username" placeholder="Username" required>
+    </div>
+
+    <div class="input-group">
+        <i class="fa-solid fa-lock"></i>
+        <input type="password" id="password" placeholder="Password" required>
+    </div>
 
     <button onclick="login()">Login</button>
 
@@ -111,7 +161,7 @@ async function login() {
     if (res.ok) {
         window.location.href = "/";
     } else {
-        document.getElementById("error").innerText = data.error;
+        document.getElementById("error").innerText = data.error || "Invalid login";
     }
 }
 </script>

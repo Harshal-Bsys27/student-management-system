@@ -3,232 +3,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Students List</title>
+    <title>Students | Student Management</title>
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
-        .container { padding: 40px; }
+        * { box-sizing: border-box; }
 
-        /* Controls */
+        body {
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+            background: #f4f5f8;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: linear-gradient(135deg, #2b0147, #4a1174);
+            padding: 14px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+        }
+
+        .navbar h3 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 22px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* PAGE */
+        .container {
+            padding: 35px 40px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #31034e;
+        }
+
+        /* CONTROLS */
         .controls {
             display: flex;
-            gap: 20px;
+            gap: 18px;
             flex-wrap: wrap;
             margin-bottom: 20px;
         }
-        .controls input, .controls select {
+
+        .controls input,
+        .controls select {
             padding: 10px;
             border-radius: 6px;
             border: 1px solid #ccc;
-            width: 200px;
+            min-width: 200px;
+            font-size: 14px;
         }
 
-        /* Table */
+        /* TABLE */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 15px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
         }
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            cursor: pointer;
-            background: #6d1544;
-            color: white;
-        }
-        tr:hover { background: #f1f1f1; }
 
-        /* Buttons */
-        .btn {
-            padding: 6px 12px;
-            margin: 2px;
-            border: none;
-            border-radius: 4px;
+        th {
+            background: #31034e;
+            color: white;
+            padding: 14px;
             cursor: pointer;
+            text-align: left;
             font-size: 14px;
         }
-        .btn-edit { background-color: #f0ad4e; color: white; }
-        .btn-delete { background-color: #d9534f; color: white; }
 
-        /* Name link */
-        .name-link {
-            color: #19278d84;
-            text-decoration: none;
-            font-weight: 600;
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
         }
+
+        tr:hover {
+            background: #f7f2fb;
+        }
+
+        /* NAME LINK */
+        .name-link {
+            color: #4a1174;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
         .name-link:hover {
             text-decoration: underline;
         }
 
-        /* Responsive table container */
+        /* BUTTONS */
+        .btn {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            color: white;
+        }
+
+        .btn-edit {
+            background: #f0ad4e;
+        }
+
+        .btn-delete {
+            background: #d9534f;
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 14px 18px;
+            background: #333;
+            color: white;
+            border-radius: 8px;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.3s;
+            font-size: 14px;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: #1db954;
+        }
+
+        .toast.error {
+            background: #e74c3c;
+        }
+
         @media (max-width: 768px) {
+            .container { padding: 25px; }
             .controls { flex-direction: column; }
-            table, th, td { font-size: 14px; }
         }
     </style>
 </head>
 
 <body>
-    <nav class="navbar">
-        <div class="logo"><h3>Student Management</h3></div>
-        <ul class="nav-links">
-            <li><a href="/">Dashboard</a></li>
-            <li><a href="/students">Students</a></li>
-            <li><a href="/add_student">Add Student</a></li>
-        </ul>
-    </nav>
 
-    <div class="container">
-        <h2>Students List</h2>
+<!-- NAVBAR -->
+<nav class="navbar">
+    <h3><i class="fa-solid fa-graduation-cap"></i> Student Management</h3>
+    <ul class="nav-links">
+        <li><a href="/">Dashboard</a></li>
+        <li><a href="/students">Students</a></li>
+        <li><a href="/add_student">Add Student</a></li>
+        <li><a href="/logout">Logout</a></li>
+    </ul>
+</nav>
 
-        <!-- Search + Filter Controls -->
-        <div class="controls">
-            <input type="text" id="searchBox" placeholder="Search student...">
+<!-- PAGE -->
+<div class="container">
+    <h2>Students List</h2>
 
-            <select id="branchFilter">
-                <option value="">Filter by Branch</option>
-            </select>
-
-            <select id="yearFilter">
-                <option value="">Filter by Year</option>
-            </select>
-        </div>
-
-        <!-- Table -->
-        <table id="students-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th onclick="sortTable('name')">Name ⬍</th>
-                    <th onclick="sortTable('roll')">Roll ⬍</th>
-                    <th onclick="sortTable('branch')">Branch ⬍</th>
-                    <th onclick="sortTable('year')">Year ⬍</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+    <!-- CONTROLS -->
+    <div class="controls">
+        <input type="text" id="searchBox" placeholder="Search student...">
+        <select id="branchFilter"><option value="">Filter by Branch</option></select>
+        <select id="yearFilter"><option value="">Filter by Year</option></select>
     </div>
 
+    <!-- TABLE -->
+    <table id="students-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th onclick="sortTable('name')">Name ⬍</th>
+                <th onclick="sortTable('roll')">Roll ⬍</th>
+                <th onclick="sortTable('branch')">Branch ⬍</th>
+                <th onclick="sortTable('year')">Year ⬍</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
 <script>
-    let allStudents = [];
-    let sortOrder = { name: 1, roll: 1, branch: 1, year: 1 };
+let allStudents = [];
+let sortOrder = { name: 1, roll: 1, branch: 1, year: 1 };
 
-    // Fetch all students
-    async function fetchStudents() {
-        try {
-            const response = await fetch('/api/students');
-            allStudents = await response.json();
-            populateFilters();
-            renderTable(allStudents);
-        } catch (error) {
-            console.error("Error fetching students:", error);
-        }
-    }
+function showToast(message, type="success") {
+    const toast = document.getElementById("toast");
+    toast.innerText = message;
+    toast.className = `toast show ${type}`;
+    setTimeout(() => toast.classList.remove("show"), 2500);
+}
 
-    // Render table rows dynamically
-    function renderTable(data) {
-        const tbody = document.querySelector('#students-table tbody');
-        tbody.innerHTML = "";
+async function fetchStudents() {
+    const res = await fetch('/api/students');
+    allStudents = await res.json();
+    populateFilters();
+    renderTable(allStudents);
+}
 
-        data.forEach(student => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${student.id}</td>
-                <td><a class="name-link" href="/student/${student.id}">${student.name}</a></td>
-                <td>${student.roll}</td>
-                <td>${student.branch}</td>
-                <td>${student.year}</td>
+function renderTable(data) {
+    const tbody = document.querySelector('#students-table tbody');
+    tbody.innerHTML = "";
+    data.forEach(s => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${s.id}</td>
+                <td><a class="name-link" href="/student/${s.id}">${s.name}</a></td>
+                <td>${s.roll}</td>
+                <td>${s.branch}</td>
+                <td>${s.year}</td>
                 <td>
-                    <button class="btn btn-edit" onclick="editStudent(${student.id})">Edit</button>
-                    <button class="btn btn-delete" onclick="deleteStudent(${student.id})">Delete</button>
+                    <button class="btn btn-edit" onclick="editStudent(${s.id})">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button class="btn btn-delete" onclick="deleteStudent(${s.id})">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
                 </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    // Search functionality
-    document.getElementById('searchBox').addEventListener('input', function () {
-        const value = this.value.toLowerCase();
-        const filtered = allStudents.filter(s =>
-            s.name.toLowerCase().includes(value) ||
-            s.roll.toLowerCase().includes(value) ||
-            s.branch.toLowerCase().includes(value) ||
-            s.year.toLowerCase().includes(value)
-        );
-        renderTable(filtered);
+            </tr>
+        `;
     });
+}
 
-    // Populate filters dynamically
-    function populateFilters() {
-        const branchSet = new Set(allStudents.map(s => s.branch));
-        const yearSet = new Set(allStudents.map(s => s.year));
+document.getElementById("searchBox").addEventListener("input", function () {
+    const v = this.value.toLowerCase();
+    renderTable(allStudents.filter(s =>
+        s.name.toLowerCase().includes(v) ||
+        s.roll.toLowerCase().includes(v) ||
+        s.branch.toLowerCase().includes(v) ||
+        s.year.toLowerCase().includes(v)
+    ));
+});
 
-        const branchFilter = document.getElementById('branchFilter');
-        const yearFilter = document.getElementById('yearFilter');
+function populateFilters() {
+    const b = new Set(allStudents.map(s => s.branch));
+    const y = new Set(allStudents.map(s => s.year));
 
-        branchFilter.innerHTML = `<option value="">Filter by Branch</option>`;
-        yearFilter.innerHTML = `<option value="">Filter by Year</option>`;
+    branchFilter.innerHTML = `<option value="">Filter by Branch</option>`;
+    yearFilter.innerHTML = `<option value="">Filter by Year</option>`;
 
-        branchSet.forEach(b =>
-            branchFilter.innerHTML += `<option value="${b}">${b}</option>`
-        );
+    b.forEach(v => branchFilter.innerHTML += `<option>${v}</option>`);
+    y.forEach(v => yearFilter.innerHTML += `<option>${v}</option>`);
+}
 
-        yearSet.forEach(y =>
-            yearFilter.innerHTML += `<option value="${y}">${y}</option>`
-        );
-    }
+branchFilter.onchange = yearFilter.onchange = () => {
+    let f = allStudents;
+    if (branchFilter.value) f = f.filter(s => s.branch === branchFilter.value);
+    if (yearFilter.value) f = f.filter(s => s.year === yearFilter.value);
+    renderTable(f);
+};
 
-    // Filter event listeners
-    document.getElementById('branchFilter').addEventListener('change', applyFilters);
-    document.getElementById('yearFilter').addEventListener('change', applyFilters);
+function sortTable(field) {
+    sortOrder[field] *= -1;
+    allStudents.sort((a,b)=> a[field] > b[field] ? sortOrder[field] : -sortOrder[field]);
+    renderTable(allStudents);
+}
 
-    function applyFilters() {
-        const branch = document.getElementById('branchFilter').value;
-        const year = document.getElementById('yearFilter').value;
+function editStudent(id) {
+    showToast("Edit feature coming soon", "error");
+}
 
-        let filtered = allStudents;
-        if (branch) filtered = filtered.filter(s => s.branch === branch);
-        if (year) filtered = filtered.filter(s => s.year === year);
-
-        renderTable(filtered);
-    }
-
-    // Sorting function
-    function sortTable(field) {
-        sortOrder[field] *= -1;
-        allStudents.sort((a, b) =>
-            a[field] < b[field] ? -1 * sortOrder[field] :
-            a[field] > b[field] ?  1 * sortOrder[field] : 0
-        );
-        renderTable(allStudents);
-    }
-
-    // Edit placeholder
-    function editStudent(id) {
-        alert(`Edit feature coming soon for ID: ${id}`);
-    }
-
-    // Delete student
-    async function deleteStudent(id) {
-        if (!confirm("Are you sure you want to delete this student?")) return;
-
-        try {
-            const res = await fetch(`/api/students/${id}`, { method: "DELETE" });
-            const data = await res.json();
-            alert(data.message);
-            fetchStudents();
-        } catch (error) {
-            console.error("Error deleting student:", error);
-        }
-    }
-
-    // Initial load
+async function deleteStudent(id) {
+    if (!confirm("Delete this student?")) return;
+    const res = await fetch(`/api/students/${id}`, { method: "DELETE" });
+    const data = await res.json();
+    showToast(data.message || "Deleted");
     fetchStudents();
+}
+
+fetchStudents();
 </script>
 
 </body>

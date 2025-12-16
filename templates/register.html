@@ -4,25 +4,53 @@
     <meta charset="UTF-8">
     <title>Register | Student Management</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            background: #f4f6f9;
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2b0147, #4a1174);
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        .auth-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .auth-container {
-            max-width: 420px;
-            margin: 90px auto;
-            padding: 35px;
+            width: 100%;
+            max-width: 430px;
             background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            border-radius: 16px;
+            padding: 40px 34px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(15px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 42px;
+            color: #31034e;
+            margin-bottom: 8px;
         }
 
         .title {
             text-align: center;
-            font-size: 26px;
-            font-weight: 600;
+            font-size: 24px;
+            font-weight: 700;
             color: #31034e;
         }
 
@@ -30,21 +58,56 @@
             text-align: center;
             font-size: 14px;
             color: #666;
-            margin-bottom: 25px;
+            margin-bottom: 24px;
         }
 
-        input {
+        .info {
+            text-align: center;
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 16px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 16px;
             width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
+        }
+
+        .input-group i {
+            position: absolute;
+            top: 50%;
+            left: 14px;
+            transform: translateY(-50%);
+            color: #888;
             font-size: 14px;
         }
 
-        input:focus {
+        .input-group input {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
             outline: none;
+        }
+
+        .input-group input:focus {
             border-color: #31034e;
+        }
+
+        .error {
+            text-align: center;
+            color: #ff4a60;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .success {
+            text-align: center;
+            color: #1db954;
+            font-size: 14px;
+            margin-bottom: 10px;
         }
 
         button {
@@ -53,14 +116,39 @@
             background: #31034e;
             color: white;
             border: none;
-            border-radius: 6px;
-            cursor: pointer;
+            border-radius: 8px;
             font-size: 15px;
-            margin-top: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+        }
+
+        button.loading {
+            pointer-events: none;
+            opacity: 0.85;
+        }
+
+        button.loading::after {
+            content: "";
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            width: 18px;
+            height: 18px;
+            border: 3px solid white;
+            border-top: 3px solid transparent;
+            border-radius: 50%;
+            transform: translateY(-50%);
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg) translateY(-50%); }
+            100% { transform: rotate(360deg) translateY(-50%); }
         }
 
         button:hover {
-            opacity: 0.92;
+            opacity: 0.93;
         }
 
         .link {
@@ -69,35 +157,71 @@
             font-size: 14px;
         }
 
-        .error {
-            color: red;
-            text-align: center;
-            margin-bottom: 12px;
-            font-size: 14px;
+        .link a {
+            color: #31034e;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .link a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
+
 <body>
 
-<div class="auth-container">
-    <div class="title">Student Management System</div>
-    <div class="subtitle">Create an account to manage students</div>
+<div class="auth-wrapper">
+    <div class="auth-container">
 
-    <div id="error" class="error"></div>
+        <div class="logo">
+            <i class="fa-solid fa-user-plus"></i>
+        </div>
 
-    <input type="text" id="username" placeholder="Username" required>
-    <input type="email" id="email" placeholder="Email" required>
-    <input type="password" id="password" placeholder="Password" required>
+        <div class="title">Create Account</div>
+        <div class="subtitle">Register to manage student records</div>
 
-    <button onclick="register()">Register</button>
+        <div class="info">
+            First registered user becomes <b>Admin</b>
+        </div>
 
-    <div class="link">
-        Already registered? <a href="/login">Login</a>
+        <div id="error" class="error"></div>
+        <div id="success" class="success"></div>
+
+        <div class="input-group">
+            <i class="fa-solid fa-user"></i>
+            <input type="text" id="username" placeholder="Username" required>
+        </div>
+
+        <div class="input-group">
+            <i class="fa-solid fa-envelope"></i>
+            <input type="email" id="email" placeholder="Email" required>
+        </div>
+
+        <div class="input-group">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="password" placeholder="Password" required>
+        </div>
+
+        <button id="registerBtn" onclick="register()">Register</button>
+
+        <div class="link">
+            Already have an account? <a href="/login">Login</a>
+        </div>
+
     </div>
 </div>
 
 <script>
 async function register() {
+    const btn = document.getElementById("registerBtn");
+    const errorDiv = document.getElementById("error");
+    const successDiv = document.getElementById("success");
+
+    errorDiv.innerText = "";
+    successDiv.innerText = "";
+    btn.classList.add("loading");
+
     const res = await fetch("/register", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
@@ -109,12 +233,13 @@ async function register() {
     });
 
     const data = await res.json();
+    btn.classList.remove("loading");
 
     if (res.ok) {
-        alert("Registration successful. Please login.");
-        window.location.href = "/login";
+        successDiv.innerText = "Registration successful! Redirecting to login...";
+        setTimeout(() => window.location.href = "/login", 1500);
     } else {
-        document.getElementById("error").innerText = data.error;
+        errorDiv.innerText = data.error || "Registration failed";
     }
 }
 </script>

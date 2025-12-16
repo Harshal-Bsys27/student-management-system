@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Student Management</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+            background: #f4f5f8;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: linear-gradient(135deg, #2b0147, #4a1174);
+            padding: 14px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 22px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* PAGE */
+        .container {
+            padding: 40px;
+        }
+
+        .welcome {
+            font-size: 22px;
+            font-weight: 600;
+            color: #31034e;
+            margin-bottom: 8px;
+        }
+
+        .role {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        /* CARDS */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 22px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+
+        .card i {
+            font-size: 26px;
+            color: #31034e;
+        }
+
+        .card h3 {
+            margin: 12px 0 5px;
+            font-size: 26px;
+            color: #222;
+        }
+
+        .card p {
+            color: #666;
+            margin: 0;
+        }
+
+        /* ACTIONS */
+        .actions {
+            margin-top: 35px;
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 12px 18px;
+            background: #31034e;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .action-btn:hover {
+            background: #3f0566;
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar">
+    <h3><i class="fa-solid fa-graduation-cap"></i> Student Management</h3>
+    <ul class="nav-links">
+        <li><a href="/">Dashboard</a></li>
+        <li><a href="/students">Students</a></li>
+        <li><a href="/add_student">Add Student</a></li>
+        <li><a href="/logout">Logout</a></li>
+    </ul>
+</nav>
+
+<div class="container">
+    <div class="welcome">
+        Welcome, {{ user.username }} 👋
+    </div>
+    <div class="role">
+        Role: <b>{{ user.role }}</b>
+    </div>
+
+    <div class="cards">
+        <div class="card">
+            <i class="fa-solid fa-users"></i>
+            <h3>{{ total_students }}</h3>
+            <p>Total Students</p>
+        </div>
+
+        <div class="card">
+            <i class="fa-solid fa-code-branch"></i>
+            <h3>{{ total_branches }}</h3>
+            <p>Branches</p>
+        </div>
+
+        <div class="card">
+            <i class="fa-solid fa-calendar"></i>
+            <h3>{{ total_years }}</h3>
+            <p>Academic Years</p>
+        </div>
+
+        {% if user.role == 'admin' %}
+        <div class="card">
+            <i class="fa-solid fa-user-shield"></i>
+            <h3>{{ total_users }}</h3>
+            <p>Registered Users</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="actions">
+        <a class="action-btn" href="/students">
+            <i class="fa-solid fa-list"></i> View Students
+        </a>
+        <a class="action-btn" href="/add_student">
+            <i class="fa-solid fa-plus"></i> Add Student
+        </a>
+        {% if user.role == 'admin' %}
+        <a class="action-btn" href="/users">
+            <i class="fa-solid fa-users-gear"></i> Manage Users
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+</body>
+</html>
