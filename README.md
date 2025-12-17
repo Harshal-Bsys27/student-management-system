@@ -111,25 +111,24 @@ Implementing authentication and CRUD operations
 Deploying Python web apps on Render
 
 Debugging Gunicorn and environment issues
-
-## 🔮 Future Improvements
+## ⚙️ Future Improvements
 
 Role-based access (Admin / User)
 
--PostgreSQL database integration
+PostgreSQL database integration
 
--Search and pagination
+Search and pagination
 
--REST API documentation
+REST API documentation
 
--Improved UI/UX
+Improved UI/UX
 
 ## 👤 Author
 
 Harshal Vasudev Barhate
 
--GitHub: https://github.com/Harshal-Bsys27
+GitHub: https://github.com/Harshal-Bsys27
 
--LinkedIn: https://www.linkedin.com/in/harshalbarhate778945ag/
+LinkedIn: https://www.linkedin.com/in/harshalbarhate778945ag/
 
--Email: harshalbarhate2028@gmail.com
+Email: harshalbarhate2028@gmail.com
