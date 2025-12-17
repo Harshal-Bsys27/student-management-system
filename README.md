@@ -95,14 +95,13 @@ Visit:
 
 http://127.0.0.1:5000
 
-🚀 Deployment
+## 🚀 Deployment
 
-This application is deployed on Render using Gunicorn.
+This application is deployed on **Render** using **Gunicorn**.
 
-Start Command:
-
+**Start Command:**
+```bash
 gunicorn backend.app:app
-
 🧠 What I Learned
 
 Structuring Flask applications for production
@@ -113,29 +112,24 @@ Deploying Python web apps on Render
 
 Debugging Gunicorn and environment issues
 
-🔮 Future Improvements
+## 🔮 Future Improvements
 
 Role-based access (Admin / User)
 
-PostgreSQL database integration
+-PostgreSQL database integration
 
-Search and pagination
+-Search and pagination
 
-REST API documentation
+-REST API documentation
 
-Improved UI/UX
+-Improved UI/UX
 
-👤 Author
+## 👤 Author
 
 Harshal Vasudev Barhate
 
-GitHub: https://github.com/Harshal-Bsys27
+-GitHub: https://github.com/Harshal-Bsys27
 
-LinkedIn: https://www.linkedin.com/in/harshalbarhate778945ag/
+-LinkedIn: https://www.linkedin.com/in/harshalbarhate778945ag/
 
-Email: harshalbarhate2028@gmail.com
-
-⭐ If you like this project, feel free to star the repository!
-
-
-
+-Email: harshalbarhate2028@gmail.com
