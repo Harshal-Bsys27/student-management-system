@@ -57,20 +57,26 @@ Built using **Flask (Python)** with a **responsive HTML/CSS/JavaScript frontend*
 
 ## 📁 Project Structure
 
+```text
 student-management-system/
 │
 ├── backend/
-│ ├── app.py
-│ └── init.py
+│   ├── app.py
+│   └── __init__.py
+│
 ├── templates/
+│
 ├── static/
-│ ├── css/
+│   └── css/
+│
 ├── screenshots/
-│ ├── login.png
-│ ├── dashboard.png
-│ └── students.png
+│   ├── login.png
+│   ├── dashboard.png
+│   └── students.png
+│
 ├── requirements.txt
 └── README.md
+
 
 
 ---
